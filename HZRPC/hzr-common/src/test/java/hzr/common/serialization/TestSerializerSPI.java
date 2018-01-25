@@ -1,11 +1,13 @@
 package hzr.common.serialization;
 
+import lombok.extern.slf4j.Slf4j;
+
 import static hzr.common.serialization.SerializerHolder.serializerImpl;
 
 /**
  * @author Zz
  **/
-
+@Slf4j
 public class TestSerializerSPI {
 
     public static void main(String[] args) {
@@ -20,7 +22,6 @@ public class TestSerializerSPI {
             long endTime = System.currentTimeMillis();
 
             System.out.println((endTime - beginTime));
-
         }
     }
 }
