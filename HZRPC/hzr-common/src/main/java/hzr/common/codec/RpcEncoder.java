@@ -1,5 +1,6 @@
 package hzr.common.codec;
 
+import hzr.common.util.SerializationUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -23,7 +24,7 @@ public class RpcEncoder extends MessageToByteEncoder {
     @Override
     public void encode(ChannelHandlerContext ctx, Object in, ByteBuf out) throws Exception {
         if (genericClass.isInstance(in)) {
-            byte[] data = serializerImpl().writeObject(in);
+            byte[] data = SerializationUtil.serialize(in);
             out.writeInt(data.length);
             out.writeBytes(data);
         }
