@@ -1,6 +1,7 @@
 package hzr.rpc;
 
 import api.HelloService;
+import api.TestService;
 import hzr.rpc.client.RpcProxy;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -16,9 +17,8 @@ public class HelloClient {
         String result = helloService.hello("World");
         System.out.println(result);
 
-        HelloService helloService2 = rpcProxy.create(HelloService.class);
-        String result2 = helloService2.hello("世界");
-        System.out.println(result2);
+        TestService t = rpcProxy.create(TestService.class);
+        t.test();
 
         System.exit(0);
     }

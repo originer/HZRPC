@@ -1,10 +1,7 @@
 package hzr.register;
 
 /**
- * 常量
- *
- * @author huangyong
- * @since 1.0.0
+ *  ZooKeeper配置
  */
 public interface Constant {
 

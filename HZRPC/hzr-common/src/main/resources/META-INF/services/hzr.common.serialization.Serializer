@@ -1,7 +1,7 @@
 #测试序列化10000个对象  结果：Fastjson  1300   ProtoStuff 370  Kryo 5000
 
-hzr.common.serialization.fastjson.FastJsonSerializer
+#hzr.common.serialization.fastjson.FastJsonSerializer
 
-#hzr.common.serialization.proto.ProtoStuffSerializer
+hzr.common.serialization.protostuff.ProtoStuffSerializer
 
 #hzr.common.serialization.kryo.KryoSerializer

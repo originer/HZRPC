@@ -6,12 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.I0Itec.zkclient.ZkClient;
 
 /**
+ * ZooKeeper实现的服务注册中心
  * @author Zz
  **/
 @Slf4j
 public class ZooKeeperServiceRegistry implements ServiceRegistry {
-//    private static final Logger log = LoggerFactory.getLogger(ZooKeeperServiceRegistry.class);
-
     private final ZkClient zkClient;
 
     public ZooKeeperServiceRegistry(String zkAddress) {

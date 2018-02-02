@@ -9,9 +9,6 @@ import static hzr.common.serialization.SerializerHolder.serializerImpl;
 
 /**
  * RPC 编码器
- *
- * @author huangyong
- * @since 1.0.0
  */
 public class RpcEncoder extends MessageToByteEncoder {
 

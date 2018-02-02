@@ -2,6 +2,7 @@ package hzr.register.impl;
 
 import hzr.register.Constant;
 import hzr.register.ServiceDiscovery;
+import hzr.register.ServiceRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.commons.collections4.CollectionUtils;
@@ -10,8 +11,8 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * 基于 ZooKeeper 的服务发现接口实现
- *
+ * ZooKeeper实现的服务发现中心
+ * @author Zz
  */
 @Slf4j
 public class ZooKeeperServiceDiscovery implements ServiceDiscovery {
