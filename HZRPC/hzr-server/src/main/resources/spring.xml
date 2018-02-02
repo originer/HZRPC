@@ -5,15 +5,17 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
 
+    <!--扫描改路径下的所有类 并把含有 @RPCService 的注册为bean-->
     <context:component-scan base-package="hzr.rpc"/>
-
+    <!--ZooKeeper、服务端 端口配置-->
     <context:property-placeholder location="classpath:config.properties"/>
 
-
+    <!--注册中心-->
     <bean id="serviceRegistry" class="hzr.register.impl.ZooKeeperServiceRegistry">
         <constructor-arg name="zkAddress" value="${registry.address}"/>
     </bean>
 
+    <!--配置服务端-->
     <bean id="rpcServer" class="hzr.rpc.server.RpcServer">
         <constructor-arg name="serviceAddress" value="${server.address}"/>
         <constructor-arg name="serviceRegistry" ref="serviceRegistry"/>

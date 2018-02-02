@@ -11,9 +11,6 @@ import static hzr.common.serialization.SerializerHolder.serializerImpl;
 
 /**
  * RPC 解码器
- *
- * @author huangyong
- * @since 1.0.0
  */
 public class RpcDecoder extends ByteToMessageDecoder {
 

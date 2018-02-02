@@ -10,6 +10,8 @@ import org.objenesis.ObjenesisStd;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static hzr.common.serialization.SerializerHolder.serializerImpl;
+
 public class SerializationUtil {
 
     private static Map<Class<?>, Schema<?>> cachedSchema = new ConcurrentHashMap<>();
@@ -24,39 +26,43 @@ public class SerializationUtil {
      */
     @SuppressWarnings("unchecked")
     public static <T> byte[] serialize(T obj) {
-        Class<T> cls = (Class<T>) obj.getClass();
-        LinkedBuffer buffer = LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE);
-        try {
-            Schema<T> schema = getSchema(cls);
-            return ProtostuffIOUtil.toByteArray(obj, schema, buffer);
-        } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        } finally {
-            buffer.clear();
-        }
+        return serializerImpl().writeObject(obj);
+//        Class<T> cls = (Class<T>) obj.getClass();
+//        LinkedBuffer buffer = LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE);
+//        try {
+//            Schema<T> schema = getSchema(cls);
+//            return ProtostuffIOUtil.toByteArray(obj, schema, buffer);
+//        } catch (Exception e) {
+//            throw new IllegalStateException(e.getMessage(), e);
+//        } finally {
+//            buffer.clear();
+//        }
     }
 
     /**
      * 反序列化（字节数组 -> 对象）
      */
     public static <T> T deserialize(byte[] data, Class<T> cls) {
-        try {
-            T message = objenesis.newInstance(cls);
-            Schema<T> schema = getSchema(cls);
-            ProtostuffIOUtil.mergeFrom(data, message, schema);
-            return message;
-        } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        }
+
+        return serializerImpl().readObject(data,cls);
+
+//        try {
+//            T message = objenesis.newInstance(cls);
+//            Schema<T> schema = getSchema(cls);
+//            ProtostuffIOUtil.mergeFrom(data, message, schema);
+//            return message;
+//        } catch (Exception e) {
+//            throw new IllegalStateException(e.getMessage(), e);
+//        }
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T> Schema<T> getSchema(Class<T> cls) {
-        Schema<T> schema = (Schema<T>) cachedSchema.get(cls);
-        if (schema == null) {
-            schema = RuntimeSchema.createFrom(cls);
-            cachedSchema.put(cls, schema);
-        }
-        return schema;
-    }
+//    @SuppressWarnings("unchecked")
+//    private static <T> Schema<T> getSchema(Class<T> cls) {
+//        Schema<T> schema = (Schema<T>) cachedSchema.get(cls);
+//        if (schema == null) {
+//            schema = RuntimeSchema.createFrom(cls);
+//            cachedSchema.put(cls, schema);
+//        }
+//        return schema;
+//    }
 }

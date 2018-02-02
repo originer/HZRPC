@@ -19,8 +19,6 @@ import java.util.Map;
  **/
 @Slf4j
 public class RpcServerHandler extends SimpleChannelInboundHandler<RpcRequest> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RpcServerHandler.class);
-
     private final Map<String, Object> handlerMap;
 
     public RpcServerHandler(Map<String, Object> handlerMap) {
@@ -36,7 +34,7 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<RpcRequest> {
             Object result = handle(request);
             response.setResult(result);
         } catch (Exception e) {
-            LOGGER.error("handle result failure", e);
+            log.error("handle result failure", e);
             response.setException(e);
         }
         // 写入 RPC 响应对象并自动关闭连接
@@ -71,7 +69,7 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<RpcRequest> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        LOGGER.error("server caught exception", cause);
+        log.error("server caught exception", cause);
         ctx.close();
     }
 }

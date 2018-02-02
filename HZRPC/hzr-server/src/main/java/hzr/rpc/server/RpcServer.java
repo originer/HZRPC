@@ -28,12 +28,10 @@ import java.util.Map;
  *
  * @author Zz
  **/
+@Slf4j
 public class RpcServer implements ApplicationContextAware, InitializingBean {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RpcServer.class);
-
     private String serviceAddress;
-
     private ServiceRegistry serviceRegistry;
 
     /**
@@ -67,6 +65,10 @@ public class RpcServer implements ApplicationContextAware, InitializingBean {
         }
     }
 
+    /**
+     * 所有Bean加载完成后执行此方法
+     * @throws Exception
+     */
     @Override
     public void afterPropertiesSet() throws Exception {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
@@ -97,10 +99,10 @@ public class RpcServer implements ApplicationContextAware, InitializingBean {
             if (serviceRegistry != null) {
                 for (String interfaceName : handlerMap.keySet()) {
                     serviceRegistry.register(interfaceName, serviceAddress);
-                    LOGGER.debug("register service: {} => {}", interfaceName, serviceAddress);
+                    log.debug("register service: {} => {}", interfaceName, serviceAddress);
                 }
             }
-            LOGGER.debug("server started on port {}", port);
+            log.debug("server started on port {}", port);
             // 关闭 RPC 服务器
             future.channel().closeFuture().sync();
         } finally {
