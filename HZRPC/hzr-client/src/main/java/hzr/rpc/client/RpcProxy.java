@@ -1,12 +1,10 @@
 package hzr.rpc.client;
 
-import hzr.common.bean.RpcRequest;
-import hzr.common.bean.RpcResponse;
+import hzr.common.message.RpcRequest;
+import hzr.common.message.RpcResponse;
 import hzr.register.ServiceDiscovery;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -41,7 +39,8 @@ public class RpcProxy {
 
     @SuppressWarnings("unchecked")
     public <T> T create(final Class<?> interfaceClass, final String serviceVersion) {
-        // 创建动态代理对象
+        //TODO 创建工具类用来动态生成代理对象
+        // 创建动态代理对象 JDK动态代理
         return (T) Proxy.newProxyInstance(
                 interfaceClass.getClassLoader(),
                 new Class<?>[]{interfaceClass},
@@ -74,6 +73,8 @@ public class RpcProxy {
                         int port = Integer.parseInt(array[1]);
                         // 创建 RPC 客户端对象并发送 RPC 请求
                         RpcClient client = new RpcClient(host, port);
+
+
                         long time = System.currentTimeMillis();
                         RpcResponse response = client.send(request);
                         log.debug("time: {}ms", System.currentTimeMillis() - time);
@@ -89,5 +90,7 @@ public class RpcProxy {
                     }
                 }
         );
+
+
     }
 }

@@ -7,10 +7,8 @@ import io.netty.handler.codec.ByteToMessageDecoder;
 
 import java.util.List;
 
-import static hzr.common.serialization.SerializerHolder.serializerImpl;
-
 /**
- * RPC 解码器
+ * Netty 解码器
  */
 public class RpcDecoder extends ByteToMessageDecoder {
 
