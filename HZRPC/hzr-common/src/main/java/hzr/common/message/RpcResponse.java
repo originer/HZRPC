@@ -1,14 +1,12 @@
-package hzr.common.bean;
+package hzr.common.message;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 /**
  * 封装 RPC 响应
  */
 
-@Getter
-@Setter
+@Data
 public class RpcResponse {
 
     private String requestId;

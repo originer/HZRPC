@@ -5,10 +5,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 
-import static hzr.common.serialization.SerializerHolder.serializerImpl;
-
 /**
- * RPC 编码器
+ * Netty 编码器
  */
 public class RpcEncoder extends MessageToByteEncoder {
 

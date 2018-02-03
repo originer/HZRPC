@@ -1,7 +1,7 @@
 package hzr.rpc.client;
 
-import hzr.common.bean.RpcRequest;
-import hzr.common.bean.RpcResponse;
+import hzr.common.message.RpcRequest;
+import hzr.common.message.RpcResponse;
 import hzr.common.codec.RpcDecoder;
 import hzr.common.codec.RpcEncoder;
 import io.netty.bootstrap.Bootstrap;

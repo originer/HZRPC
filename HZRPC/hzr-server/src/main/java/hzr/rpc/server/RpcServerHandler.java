@@ -1,7 +1,7 @@
 package hzr.rpc.server;
 
-import hzr.common.bean.RpcRequest;
-import hzr.common.bean.RpcResponse;
+import hzr.common.message.RpcRequest;
+import hzr.common.message.RpcResponse;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -9,8 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 

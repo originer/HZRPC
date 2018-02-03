@@ -1,7 +1,7 @@
 package hzr.rpc.server;
 
-import hzr.common.bean.RpcRequest;
-import hzr.common.bean.RpcResponse;
+import hzr.common.message.RpcRequest;
+import hzr.common.message.RpcResponse;
 import hzr.common.codec.RpcDecoder;
 import hzr.common.codec.RpcEncoder;
 import hzr.register.ServiceRegistry;
@@ -13,8 +13,6 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
