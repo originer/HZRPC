@@ -25,7 +25,6 @@
             <groupId>com.101tec</groupId>
             <artifactId>zkclient</artifactId>
         </dependency>
-
         <!-- Apache Commons Lang -->
         <dependency>
             <groupId>org.apache.commons</groupId>
