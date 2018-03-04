@@ -1,36 +1,36 @@
 package hzr.common.codec;
 
+import hzr.common.message.Request;
+import hzr.common.serializer.KryoSerializer;
+import hzr.common.serializer.Serializer;
 import hzr.common.util.SerializationUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.ByteToMessageDecoder;
-
-import java.util.List;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Netty 解码器
  */
-public class RpcDecoder extends ByteToMessageDecoder {
+public class RpcDecoder extends LengthFieldBasedFrameDecoder {
 
-    private Class<?> genericClass;
-
-    public RpcDecoder(Class<?> genericClass) {
-        this.genericClass = genericClass;
+    private static final Logger LOGGER = LoggerFactory.getLogger(RpcDecoder.class);
+    private Serializer serializer = new KryoSerializer();
+    public RpcDecoder(int maxFrameLength) {
+        super(maxFrameLength, 0, 4, 0, 4);
     }
-
     @Override
-    public void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        if (in.readableBytes() < 4) {
-            return;
+    protected Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
+        ByteBuf decode = (ByteBuf) super.decode(ctx, in);
+        if (decode != null) {
+            int byteLength = decode.readableBytes();
+            byte[] byteHolder = new byte[byteLength];
+            decode.readBytes(byteHolder);
+            Object deserialize = serializer.deserialize(byteHolder);
+            return deserialize;
         }
-        in.markReaderIndex();
-        int dataLength = in.readInt();
-        if (in.readableBytes() < dataLength) {
-            in.resetReaderIndex();
-            return;
-        }
-        byte[] data = new byte[dataLength];
-        in.readBytes(data);
-        out.add(SerializationUtil.deserialize(data, genericClass));
+        LOGGER.debug("Decoder Result is null");
+        return null;
     }
 }

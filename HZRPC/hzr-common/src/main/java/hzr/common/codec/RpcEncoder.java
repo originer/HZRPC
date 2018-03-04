@@ -1,5 +1,7 @@
 package hzr.common.codec;
 
+import hzr.common.serializer.KryoSerializer;
+import hzr.common.serializer.Serializer;
 import hzr.common.util.SerializationUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -8,20 +10,13 @@ import io.netty.handler.codec.MessageToByteEncoder;
 /**
  * Netty 编码器
  */
-public class RpcEncoder extends MessageToByteEncoder {
-
-    private Class<?> genericClass;
-
-    public RpcEncoder(Class<?> genericClass) {
-        this.genericClass = genericClass;
-    }
-
+public class RpcEncoder extends MessageToByteEncoder<Object> {
+    private Serializer serializer = new KryoSerializer();
     @Override
-    public void encode(ChannelHandlerContext ctx, Object in, ByteBuf out) throws Exception {
-        if (genericClass.isInstance(in)) {
-            byte[] data = SerializationUtil.serialize(in);
-            out.writeInt(data.length);
-            out.writeBytes(data);
-        }
+    protected void encode(ChannelHandlerContext channelHandlerContext, Object msg, ByteBuf out) throws Exception {
+        byte[] bytes = serializer.serialize(msg);
+        int length = bytes.length;
+        out.writeInt(length);
+        out.writeBytes(bytes);
     }
 }
