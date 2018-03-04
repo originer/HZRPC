@@ -16,7 +16,7 @@ public class ZooKeeperServiceRegistry implements ServiceRegistry {
     public ZooKeeperServiceRegistry(String zkAddress) {
         // 创建 ZooKeeper 客户端
         zkClient = new ZkClient(zkAddress, Constant.ZK_SESSION_TIMEOUT, Constant.ZK_CONNECTION_TIMEOUT);
-        log.debug("connect zookeeper");
+        log.debug("ZooKeeperServiceRegistry connect zookeeper");
     }
 
     @Override
@@ -37,5 +37,10 @@ public class ZooKeeperServiceRegistry implements ServiceRegistry {
         String addressPath = servicePath + "/address-";
         String addressNode = zkClient.createEphemeralSequential(addressPath, serviceAddress);
         log.debug("create address node: {}", addressNode);
+    }
+
+    @Override
+    public void unRegister() {
+
     }
 }
