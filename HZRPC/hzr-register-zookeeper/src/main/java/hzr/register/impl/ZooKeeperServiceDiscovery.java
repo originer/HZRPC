@@ -2,7 +2,6 @@ package hzr.register.impl;
 
 import hzr.register.Constant;
 import hzr.register.ServiceDiscovery;
-import hzr.register.ServiceRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.commons.collections4.CollectionUtils;
@@ -21,7 +20,6 @@ public class ZooKeeperServiceDiscovery implements ServiceDiscovery {
     public ZooKeeperServiceDiscovery(String zkAddress) {
         this.zkAddress = zkAddress;
     }
-
     @Override
     public String discover(String name) {
         // 创建 ZooKeeper 客户端
