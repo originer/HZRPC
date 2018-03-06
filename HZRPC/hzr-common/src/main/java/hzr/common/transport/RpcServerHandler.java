@@ -28,12 +28,13 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<Request> {
         String methodName = request.getMethod();
         Object[] params = request.getParams();
         Class<?>[] parameterTypes = request.getParameterTypes();
+        long requestId = request.getRequestId();
+
         Method method = service.getClass().getDeclaredMethod(methodName, parameterTypes);
         method.setAccessible(true);
         Object invoke = method.invoke(service, params);
 
         //封装响应
-        long requestId = request.getRequestId();
         Response response = new Response();
         response.setRequestId(requestId);
         response.setResponse(invoke);
