@@ -2,10 +2,11 @@ package hzr.spring.provider.bean;
 
 import hzr.common.bootstrap.ServerBuilder;
 import hzr.common.transport.server.Server;
+import hzr.common.transport.server.ServerImpl;
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
@@ -13,35 +14,38 @@ import java.util.Map;
  * @author Zz
  **/
 @Data
-@Slf4j
-public class ServerFactoryBean<T> implements FactoryBean<T> {
+public class ServerFactoryBean implements FactoryBean<Object> {
 
+    // 远程调用的接口
     private Class<?> serviceInterface;
-//    private Object serviceImpl;
-//    private String ip
-//    private String serviceName;
-
-    private Map<String, Object> serviceMap;
+    private Object serviceImpl;
+//    private String ip;
     private int port;
+//    private String serviceName;
     private String zkConn;
-    private Server rpcServer;
+    private ServerImpl rpcServer;
 
-    //服务注册并提供
+    private Map<String,Object> serviceMap;
+
     public void start() {
-        rpcServer = ServerBuilder
-                .builder()
-                .port(port)
-                .zkConn(zkConn)
+        Server build = ServerBuilder.builder().zkConn(zkConn)
                 .serviceMap(serviceMap)
-                .build();
-        rpcServer.start();
+                .port(port)
+                .zkConn(zkConn).build2();
+        build.start();
+//        rpcServer = new ServerImpl(port, serviceImpl, serviceName);
+//        rpcServer.setZkConn(getZkConn());
+//        rpcServer.start();
     }
 
+    public void destroy() {
+        rpcServer.shutdown();
+    }
 
     @Nullable
     @Override
-    public T getObject() throws Exception {
-        return (T) this;
+    public Object getObject() throws Exception {
+        return this;
     }
 
     @Nullable
@@ -54,4 +58,5 @@ public class ServerFactoryBean<T> implements FactoryBean<T> {
     public boolean isSingleton() {
         return true;
     }
+
 }
