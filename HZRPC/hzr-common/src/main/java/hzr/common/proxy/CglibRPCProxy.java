@@ -7,7 +7,7 @@ import net.sf.cglib.proxy.MethodProxy;
 
 import java.lang.reflect.Method;
 
-public class CglibRpcProxy implements RpcProxy {
+public class CglibRPCProxy implements RPCProxy {
     @Override
     public <T> T proxyInterface(Client client, Class<T> serviceInterface) {
         Enhancer enhancer = new Enhancer();
