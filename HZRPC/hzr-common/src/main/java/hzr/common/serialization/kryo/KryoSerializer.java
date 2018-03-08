@@ -11,42 +11,42 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 /**
- * @author Zz
- * @description 使用fastjson序列化需要实现java.io.Serializable接口
- **/
+ * 要序列化的类需要实现Serializable接口
+ */
 public class KryoSerializer implements Serializer {
-    @Override
-    public <T> byte[] writeObject(T obj) {
-        Kryo kryo = new Kryo();
-        kryo.setReferences(false);
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        Output output = new Output(baos);
-        kryo.writeClassAndObject(output,obj);
-        output.flush();
-        output.clear();
+	@Override
+	public <T> byte[] writeObject(T obj) {
+		Kryo kryo = new Kryo();
+		kryo.setReferences(false);
+		kryo.register(obj.getClass(), new JavaSerializer());
 
-        byte[] b = baos.toByteArray();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		Output output = new Output(baos);
+		kryo.writeClassAndObject(output, obj);
+		output.flush();
+		output.close();
 
-        try {
-            baos.flush();
-            baos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+		byte[] b = baos.toByteArray();
+		try {
+			baos.flush();
+			baos.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return b;
+	}
 
-        return b;
-    }
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T readObject(byte[] bytes, Class<T> clazz) {
+		Kryo kryo = new Kryo();
+		kryo.setReferences(false);
+		kryo.register(clazz, new JavaSerializer());
 
-    @Override
-    public <T> T readObject(byte[] bytes, Class<T> clazz) {
-        Kryo kryo = new Kryo();
-        kryo.setReferences(false);
-        kryo.register(clazz, new JavaSerializer());
+		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+		Input input = new Input(bais);
+		return (T) kryo.readClassAndObject(input);
+	}
 
-        ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-        Input input = new Input(bais);
-
-        return (T) kryo.readClassAndObject(input);
-    }
 }
