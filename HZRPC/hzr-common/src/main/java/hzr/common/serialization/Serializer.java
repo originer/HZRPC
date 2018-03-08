@@ -1,15 +1,15 @@
 package hzr.common.serialization;
 
 /**
- * @author Zz
- **/
+ * 序列化接口
+ */
 public interface Serializer {
 
-    /**
-     * 将对象序列化成byte[]
-     * @param obj
-     * @return
-     */
+	/**
+	 * 将对象序列化成byte[]
+	 * @param obj
+	 * @return
+	 */
     <T> byte[] writeObject(T obj);
 
     /**
@@ -20,4 +20,3 @@ public interface Serializer {
      */
     <T> T readObject(byte[] bytes, Class<T> clazz);
 }
-
