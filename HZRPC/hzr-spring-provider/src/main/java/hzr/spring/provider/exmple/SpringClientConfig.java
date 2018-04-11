@@ -41,7 +41,7 @@ public class SpringClientConfig {
     public String getServerList(Model model) {
         ZkClient zkClient = new ZkClient("127.0.0.1:2181");
         List<String> services = zkClient.getChildren("/service");
-        final List<ServiceModel> serviceModels = new ArrayList<ServiceModel>();
+        final List<ServiceModel> serviceModels = new ArrayList<>();
         if (!CollectionUtils.isEmpty(services)) {
             for (String serviceName : services) {
                 ServiceModel serviceModel = new ServiceModel();
@@ -61,16 +61,24 @@ public class SpringClientConfig {
 //                }
 //                serviceModel.setServiceProviders(serviceProviders);
                 serviceModels.add(serviceModel);
+                model.addAttribute("service", serviceModel);
             }
         }
         model.addAttribute("services", serviceModels);
-        return "index";
+        String index = "index";
+        return index;
     }
 
-    @RequestMapping("/list1")
-    @ResponseBody
-    public List<String> list(ApplicationContext ctx) {
-      return null;
+    @RequestMapping(value = "/index")
+    public String index(Model  model)
+    {
+        ServiceModel serviceModel = new ServiceModel();
+        serviceModel.setServiceName("testServiceModel");
+        List<ServiceModel> serviceModelList = new ArrayList<ServiceModel>();
+        serviceModelList.add(serviceModel);
+        model.addAttribute("serviceModelList",serviceModelList);
+        model.addAttribute("serviceModel",serviceModel);
+        return "test";
     }
 
     @RequestMapping("/hello")
@@ -80,7 +88,7 @@ public class SpringClientConfig {
         rpcClient.say(say);
         long e = System.currentTimeMillis();
 
-        log.info("调用服务耗时:{}",(e-s));
+        log.info("调用服务耗时:{}",(e-s)+"ms");
 
         return rpcClient.say(say);
     }

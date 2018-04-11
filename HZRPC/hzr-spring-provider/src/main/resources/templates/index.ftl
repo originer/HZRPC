@@ -75,12 +75,12 @@
                             </tr>
                             </thead>
                             <tbody>
-                                <#--<#list service.serviceProviders as serviceProvider>-->
-                                <#--<tr>-->
-                                    <#--<td>${serviceProvider.ip}</td>-->
-                                    <#--<td>${serviceProvider.port}</td>-->
-                                <#--</tr>-->
-                                <#--</#list>-->
+                                <#list service.serviceProviders as serviceProvider>
+                                <tr>
+                                    <td>${serviceProvider.ip}</td>
+                                    <td>${serviceProvider.port}</td>
+                                </tr>
+                                </#list>
                         </table>
                     </div>
                 </div>
