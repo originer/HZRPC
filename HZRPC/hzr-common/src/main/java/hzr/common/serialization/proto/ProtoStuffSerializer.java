@@ -12,8 +12,9 @@ import org.objenesis.ObjenesisStd;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+
 /**
- *
+ * 需要有无参构造函数
  */
 public class ProtoStuffSerializer implements Serializer {
 	

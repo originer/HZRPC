@@ -1,10 +1,9 @@
 package hzr.common.transport.client;
 
-import com.google.common.base.Splitter;
-import hzr.common.message.Request;
-import hzr.common.message.Response;
-import hzr.common.proxy.CglibRpcProxy;
-import hzr.common.proxy.RpcProxy;
+import hzr.common.protocol.Request;
+import hzr.common.protocol.Response;
+import hzr.common.proxy.CGLIBProxy;
+import hzr.common.proxy.RPCProxy;
 import hzr.common.transport.ChannelHolder;
 import hzr.common.util.ResponseMapCache;
 import hzr.register.impl.ZooKeeperServiceDiscovery;
@@ -16,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -36,18 +34,17 @@ public class ClientImpl implements Client {
     private static AtomicLong atomicLong = new AtomicLong();
     // 通过此发布的服务名称,来寻找对应的服务提供者
     private String serviceName;
-    private int requestTimeoutMillis = 10 * 1000;
+    // 响应超时时间
+    private int requestTimeoutMillis = 10000;
     private EventLoopGroup eventLoopGroup = new NioEventLoopGroup(2);
     private String zkConn;
-    //    private CuratorFramework curatorFramework;
-    private ZooKeeperServiceDiscovery zkDiscover;
+
     private String serviceAddress;
-    private String serviceVersion;
-    //TODO proxy实现方式 后续可以改成工厂模式，有默认实现
-    private Class<? extends RpcProxy> clientProxyClass;
-    private RpcProxy rpcProxy;
+    // 代理方式
+    private Class<? extends RPCProxy> clientProxyClass;
+    private RPCProxy RPCProxy;
     // 缓存
-    // 存放ChannelConf到一个CopyOnWriteArrayList中，这个本就是读多写少的场景(服务注册后很少会发生状态改变)，所以很适用
+    // 存放ChannelHolder到一个CopyOnWriteArrayList中，这个本就是读多写少的场景(服务注册后很少会发生状态改变)，所以很适用
     // CopyOnWriteArrayList容器即写时复制的容器，可以做到读写分离，在高并发的情况下不需要上锁
     public static CopyOnWriteArrayList<ChannelHolder> channelCachePool = new CopyOnWriteArrayList<>();
 
@@ -56,30 +53,13 @@ public class ClientImpl implements Client {
     }
 
     public void init() {
-
-        zkDiscover = new ZooKeeperServiceDiscovery(getZkConn());
-        if (zkDiscover != null) {
+        ZooKeeperServiceDiscovery zkDiscover = new ZooKeeperServiceDiscovery(getZkConn());
             //TODO 此处可以添加verision做负载均衡
-//            if (StringUtils.isNotEmpty(serviceName)) {
-//                serviceName += "-" + serviceVersion;
-//            }
-            serviceAddress = zkDiscover.discover(serviceName);
-            LOGGER.debug("discover service: {} => {}", serviceName, serviceAddress);
-        }
+        serviceAddress = zkDiscover.discover(serviceName);
+        LOGGER.debug("discover service: {} => {}", serviceName, serviceAddress);
 
-//        String[] array = StringUtils.split(serviceAddress, ":");
-//        String host = array[0];
-//        int port = Integer.parseInt(array[1]);
-        // 关闭删除本地缓存中多出的channel
-        for (ChannelHolder cw : channelCachePool) {
-            String serviceAddress = cw.getConnStr();
-            if (!serviceAddress.contains(serviceAddress)) {
-                cw.close();
-                LOGGER.info("Remove channel {},{}", serviceAddress,cw);
-                channelCachePool.remove(cw);
-            }
-        }
         // 增加本地缓存中不存在的连接地址
+        // 采用延迟加载策略，当一个服务第一次被调用时，会创建一个Channel并保存到 channelCachePool
         boolean containThis = false;
         for (ChannelHolder cw : channelCachePool) {
             if (serviceAddress != null && serviceAddress.equals(cw.getConnStr())) {
@@ -87,34 +67,40 @@ public class ClientImpl implements Client {
             }
         }
         if (!containThis) {
-            addNewChannel(serviceAddress);
+            addNewChannel(serviceName, serviceAddress);
         }
     }
 
-    private void addNewChannel(String serviceAddress) {
+    private void addNewChannel(String serviceName, String serviceAddress) {
         try {
             String[] array = StringUtils.split(serviceAddress, ":");
             String host = array[0];
             int port = Integer.parseInt(array[1]);
-            
-            ChannelHolder channelHolder = new ChannelHolder(host, port);
+
+            ChannelHolder channelHolder = new ChannelHolder(serviceName, host, port);
             channelCachePool.add(channelHolder);
-            LOGGER.info("Add New Channel {},{}", serviceAddress,channelHolder);
+            LOGGER.info("Add New Channel {}", serviceAddress);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private ChannelHolder selectChannel() {
+    private ChannelHolder selectChannel(String conn) {
+//        TODO 这里的工作交由ZooKeeper处理
         Random random = new Random();
         //同一个服务下有好几个链接地址的实现，那就选一个就是，其实为集群部署考虑，
-        // 每一台服务器部署有相同的服务，选择其一来处理即可，假如是nginx代理那就无所谓了
         int size = channelCachePool.size();
-        if (size < 1) {
-            return null;
+        for (int i = 0; i < size; i++) {
+            if (channelCachePool.get(i).getConnStr().equals(conn)) {
+                return channelCachePool.get(i);
+            }
         }
-        int i = random.nextInt(size);
-        return channelCachePool.get(i);
+        return null;
+    }
+
+
+    public void setClientProxyClass(Class<? extends hzr.common.proxy.RPCProxy> clientProxyClass) {
+        this.clientProxyClass = clientProxyClass;
     }
 
     @Override
@@ -123,12 +109,13 @@ public class ClientImpl implements Client {
         Request request = new Request();
         request.setRequestId(atomicLong.incrementAndGet());
         request.setMethod(method.getName());
+
         request.setParams(args);
         request.setClazz(clazz);
         request.setParameterTypes(method.getParameterTypes());
         request.setServiceName(serviceName);
-
-        ChannelHolder channelHolder = selectChannel();
+        //从CopyOnWriteArrayList容器中根据服务名获取可用的channel连接
+        ChannelHolder channelHolder = selectChannel(serviceAddress);
         if (channelHolder == null) {
             Response response = new Response();
             RuntimeException runtimeException = new RuntimeException("Channel is not active now");
@@ -149,16 +136,17 @@ public class ClientImpl implements Client {
             return response;
         }
         try {
-            //TODO  把request信息发送给服务器
-            channel.writeAndFlush(request);
-            //建立一个ResponseMap，将RequestId作为键，服务端回应的内容作为值保存于BlockingQueue，
-            // 最后一起保存在这个ResponseMap中
+            //这里要先对每个请求申请blockingQueue，否则高并发环境下RpcClientHandler可能获取不blockingQueue
             BlockingQueue<Response> blockingQueue = new ArrayBlockingQueue<>(1);
             ResponseMapCache.responseMap.put(request.getRequestId(), blockingQueue);
+            channel.writeAndFlush(request);
+
+            // 建立一个ResponseMap，将RequestId作为键，服务端回应的内容作为值保存于BlockingQueue，
+            // 最后一起保存在这个ResponseMap中
+
             //poll(time):取走BlockingQueue里排在首位的对象,若不能立即取出,则可以等time参数规定的时间,取不到时返回null
             return blockingQueue.poll(requestTimeoutMillis, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
-            //这个异常是自定义的，只是为了说明字面意思
             throw new RuntimeException("service" + serviceName + " method " + method + " timeout");
         } finally {
             try {
@@ -172,26 +160,29 @@ public class ClientImpl implements Client {
         }
     }
 
+
+//    public RPCFuture sendMessageByAnsc(Class<?> clazz, Method method, Object[] args) {
+//
+//    }
+
     @Override
     public <T> T proxyInterface(Class<T> serviceInterface) {
 //        默认使用cglib
         if (clientProxyClass == null) {
-            clientProxyClass = CglibRpcProxy.class;
+            clientProxyClass = CGLIBProxy.class;
         }
         try {
-            rpcProxy = clientProxyClass.newInstance();
+            RPCProxy = clientProxyClass.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
         }
-        return rpcProxy.proxyInterface(this, serviceInterface);
+        return RPCProxy.proxyInterface(this, serviceInterface);
     }
 
     @Override
     public void close() {
         //注意要关三处地方，一个是先关闭zookeeper的连接，另一个是channel池对象，最后是netty的断开关闭
-//        if (curatorFramework != null) {
-//            curatorFramework.close();
-//        }
+
         try {
             for (ChannelHolder cw : channelCachePool) {
                 cw.close();

@@ -25,10 +25,15 @@ public class JDKProxy implements RPCProxy {
         }
     }
 
-
+    /**
+     * 不是所有的响应都具备equals,toString,hashCode方法，为了防止调用者调用产生错误，对这三个方法做特殊处理
+     * @param client
+     * @param serviceInterface
+     * @param <T>
+     * @return
+     */
     @Override
     public <T> T proxyInterface(final Client client, final Class<T> serviceInterface) {
-        // Fix JDK proxy  limitations and add other proxy implementation like cg-lib, spring proxy factory etc.
         Object proxyInstance = Proxy.newProxyInstance(ClientImpl.class.getClassLoader(),
                 new Class[]{serviceInterface}, new InvocationHandler() {
                     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -44,7 +49,6 @@ public class JDKProxy implements RPCProxy {
                         try {
                             return client.sendMessage(serviceInterface, method, args).getResponse();
                         } catch (Exception e) {
-                            // TODO RPC invoke exception handle
                             throw new RuntimeException(e);
                         }
                     }

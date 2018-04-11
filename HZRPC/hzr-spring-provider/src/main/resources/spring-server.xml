@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:component-scan base-package="hzr.spring.provider.bean"/>
+
+    <!--<context:property-placeholder location="classpath:rpc.properties"/>-->
+
+    <bean id="serverBean" class="hzr.spring.provider.bean.ServerBean">
+        <constructor-arg name="port" value= "9999"/>
+        <constructor-arg name="zkConn" value="127.0.0.1:2181"/>
+        <constructor-arg name="serviceMap">
+            <map>
+                <entry key="HelloWorld" value-ref="helloWorld"/>
+            </map>
+        </constructor-arg>
+    </bean>
+    <bean id="helloWorld" class="hzr.spring.provider.exmple.HelloWorldImpl"/>
+
+</beans>

@@ -1,8 +1,8 @@
 package hzr.common.transport;
 
 import com.google.common.base.Preconditions;
-import hzr.common.message.Request;
-import hzr.common.message.Response;
+import hzr.common.protocol.Request;
+import hzr.common.protocol.Response;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
@@ -21,6 +21,7 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<Request> {
 
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, Request request) throws Exception {
         //通过serviceName从serviceMap中取出实例
+        LOGGER.info("请求服务 requestId：{}，serviceName：{}", request.getRequestId(),request.getServiceName());
         Object service = serviceMap.get(request.getServiceName());
         Preconditions.checkNotNull(service);
 

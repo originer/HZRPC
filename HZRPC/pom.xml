@@ -10,8 +10,6 @@
     <version>1.0-SNAPSHOT</version>
     <modules>
         <module>hzr-common</module>
-        <module>hzr-client</module>
-        <module>hzr-server</module>
         <module>hzr-register-zookeeper</module>
     </modules>
 
