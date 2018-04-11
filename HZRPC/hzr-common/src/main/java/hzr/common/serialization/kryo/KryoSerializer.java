@@ -19,7 +19,7 @@ public class KryoSerializer implements Serializer {
 	public <T> byte[] writeObject(T obj) {
 		Kryo kryo = new Kryo();
 		kryo.setReferences(false);
-		kryo.register(obj.getClass(), new JavaSerializer());
+		kryo.register(obj.getClass());
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		Output output = new Output(baos);
@@ -42,7 +42,7 @@ public class KryoSerializer implements Serializer {
 	public <T> T readObject(byte[] bytes, Class<T> clazz) {
 		Kryo kryo = new Kryo();
 		kryo.setReferences(false);
-		kryo.register(clazz, new JavaSerializer());
+		kryo.register(clazz);
 
 		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
 		Input input = new Input(bais);

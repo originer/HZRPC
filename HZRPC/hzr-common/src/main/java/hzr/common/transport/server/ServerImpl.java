@@ -1,19 +1,21 @@
 package hzr.common.transport.server;
 
-import hzr.common.codec.RpcDecoder;
-import hzr.common.codec.RpcEncoder;
+import hzr.common.codec.V2.RPCDecoder;
+import hzr.common.codec.V2.RPCEncoder;
+import hzr.common.protocol.Request;
+import hzr.common.protocol.Response;
 import hzr.common.transport.RpcServerHandler;
 import hzr.common.util.NetUtils;
 import hzr.register.ServiceRegistry;
 import hzr.register.impl.ZooKeeperServiceRegistry;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import org.apache.commons.lang3.StringUtils;
@@ -24,13 +26,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ServerImpl implements Server {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerImpl.class);
 
-
-    private boolean started = false;
-    private Channel channel;
-
     private int port;
+
+    /**
+     * 单服务注册，可以去掉
+     */
     private Object serviceImpl;
     private String serviceName;
 
@@ -48,6 +51,7 @@ public class ServerImpl implements Server {
 
     /**
      * 注册单个服务
+     *
      * @param port
      * @param serviceImpl
      * @param serviceName
@@ -62,6 +66,7 @@ public class ServerImpl implements Server {
 
     /**
      * 注册多个服务
+     *
      * @param port
      * @param serviceMap
      * @param zkConn
@@ -77,14 +82,14 @@ public class ServerImpl implements Server {
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
-                .childHandler(new ChannelInitializer<SocketChannel>() {
+                .childHandler(new ChannelInitializer<NioSocketChannel>() {
                     @Override
-                    protected void initChannel(SocketChannel socketChannel) throws Exception {
+                    protected void initChannel(NioSocketChannel socketChannel) throws Exception {
                         socketChannel.pipeline()
                                 .addLast(new LoggingHandler(LogLevel.INFO))
-                                .addLast(new RpcDecoder(10 * 1024 * 1024))
-                                .addLast(new RpcEncoder())
-                                .addLast(new RpcServerHandler(serviceMap));
+                                .addLast(new RPCDecoder(Request.class))
+                                .addLast(new RpcServerHandler(serviceMap))
+                                .addLast(new RPCEncoder(Response.class));
                     }
                 });
         try {
@@ -93,8 +98,6 @@ public class ServerImpl implements Server {
             //接着注册服务
             registerService();
             LOGGER.info("Server Started At {}", port);
-            started = true;
-            this.channel = future.channel();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -111,15 +114,15 @@ public class ServerImpl implements Server {
             serviceRegistry.register(serviceName, serviceAddress);
         } else if (serviceMap.size() > 0) {
             serviceMap.forEach((k, v) -> {
-                LOGGER.info("注册服务 serviceName: {}",k);
                 serviceRegistry.register(k, serviceAddress);
+                LOGGER.info("注册服务 serviceName: {}", k);
             });
         }
     }
 
     @Override
     public void shutdown() {
-        //关停相关服务的逻辑
+        //关停相关服务
         LOGGER.info("Shutting down server {}", serviceName);
         bossGroup.shutdownGracefully();
         workerGroup.shutdownGracefully();
@@ -142,11 +145,4 @@ public class ServerImpl implements Server {
         this.zkConn = zkConn;
     }
 
-    public Channel getChannel() {
-        return channel;
-    }
-
-    public void setChannel(Channel channel) {
-        this.channel = channel;
-    }
 }

@@ -7,6 +7,7 @@ import org.I0Itec.zkclient.ZkClient;
 
 /**
  * ZooKeeper实现的服务注册中心
+ *
  * @author Zz
  **/
 @Slf4j
@@ -15,8 +16,7 @@ public class ZooKeeperServiceRegistry implements ServiceRegistry {
 
     public ZooKeeperServiceRegistry(String zkAddress) {
         // 创建 ZooKeeper 客户端
-        zkClient = new ZkClient(zkAddress, Constant.ZK_SESSION_TIMEOUT, Constant.ZK_CONNECTION_TIMEOUT);
-        log.debug("ZooKeeperServiceRegistry connect zookeeper");
+        zkClient = new ZkClient(zkAddress);
     }
 
     @Override
@@ -41,6 +41,5 @@ public class ZooKeeperServiceRegistry implements ServiceRegistry {
 
     @Override
     public void unRegister() {
-
     }
 }

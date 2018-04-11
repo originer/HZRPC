@@ -1,14 +1,14 @@
 package hzr.common.util;
 
+
 import static hzr.common.serialization.SerializerHolder.serializerImpl;
 
 /**
- * 序列化工具（单例）
+ * 序列化工具
  */
 public class SerializationUtil {
     private SerializationUtil() {
     }
-
     /**
      * 序列化（对象 -> 字节数组）
      */
@@ -20,8 +20,8 @@ public class SerializationUtil {
     /**
      * 反序列化（字节数组 -> 对象）
      */
-    public static <T> T deserialize(byte[] data, Class<T> cls) {
-        return serializerImpl().readObject(data,cls);
+    public static <T> T deserialize(byte[] data, Class<T> clazz) {
+        return serializerImpl().readObject(data,clazz);
     }
 
 }

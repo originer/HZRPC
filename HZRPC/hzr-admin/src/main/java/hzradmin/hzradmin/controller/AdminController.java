@@ -35,16 +35,14 @@ public class AdminController {
     @PostConstruct
     public void init() {
         //通过curatorFramework [zk的抽象API接口] 来连接zk
-        curatorFramework = CuratorFrameworkFactory.newClient(ZK_SERVER, new ExponentialBackoffRetry(1000, 3));
+        curatorFramework = CuratorFrameworkFactory.newClient("127.0.0.1:2181", new ExponentialBackoffRetry(1000, 3));
         curatorFramework.start();
     }
 
     @RequestMapping("/index")
     public String index(Map<String, Object> model) throws Exception {
         List<String> services = curatorFramework.getChildren().forPath(ZK_PATH_PREFIX);
-
         System.out.println(services.toString());
-
         model.put("name", services.toString());
         return "index";
     }

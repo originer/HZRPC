@@ -1,6 +1,6 @@
 package hzr.common.transport.client;
 
-import hzr.common.message.Response;
+import hzr.common.protocol.Response;
 
 import java.lang.reflect.Method;
 

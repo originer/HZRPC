@@ -21,7 +21,7 @@ public @interface RpcService {
     Class<?> value();
 
     /**
-     * 服务版本号
+     * 服务版名称
      */
-    String version() default "";
+    String serviceName() default "";
 }
