@@ -56,6 +56,6 @@ public class AdminController {
             }
         }
         model.addAttribute("services", serviceModels);
-        return "index";
+        return "index2";
     }
 }
