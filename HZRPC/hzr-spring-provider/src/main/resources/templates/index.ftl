@@ -24,7 +24,8 @@
 <nav class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
         <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                    aria-expanded="false" aria-controls="navbar">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
@@ -34,11 +35,12 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li class="active"><a href="#">Home</a></li>
-                <li><a href="#about">About</a></li>
+                <li class="active"><a href="/test/list">List</a></li>
+                <li><a href="/test/index">Test</a></li>
                 <li><a href="#contact">Contact</a></li>
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                       aria-expanded="false">Dropdown <span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="#">Action</a></li>
                         <li><a href="#">Another action</a></li>
@@ -57,38 +59,29 @@
 <div class="container theme-showcase" role="main">
 
     <div class="page-header">
-        <h1>Services</h1>
-    </div>
-    <#list services as service>
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">${service.serviceName}</h3>
-            </div>
-            <div class="panel-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <table class="table">
-                            <thead>
-                            <tr>
-                                <th>IP</th>
-                                <th>Port</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                                <#list service.serviceProviders as serviceProvider>
-                                <tr>
-                                    <td>${serviceProvider.ip}</td>
-                                    <td>${serviceProvider.port}</td>
-                                </tr>
-                                </#list>
-                        </table>
-                    </div>
-                </div>
-            </div>
+        <div id="board" class="jumbotron">
+            <h4><span id="status1" class="text-center">调用结果：</span> <span id="status" class="label label-success"></span><br></h4>
+            <h4><span id="result1" class="text-center">返回结果：</span> <span id="result" class="label label-success"></span><br></h4>
+            <h4><span id="time1" class="text-center">过程耗时：</span> <span id="time" class="label label-success"></span><br></h4>
         </div>
-    </#list>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h2 class="panel-title"></h2>
+        </div>
+        <div class="panel-body">
+            <li class="list-group-item" th:each="service : ${serviceList}">
+                <h3>
+                <span class="label label-info" th:text="${service.serviceName}">服务名称</span>
+                <span class="label label-success" th:text="${service.serviceProvider.ip}">服务IP</span>
+                <span class="label label-success" th:text="${service.serviceProvider.port}">服务IP</span>
+                    <button type="button" class="btn btn btn-default" th:onclick="'javascript:send(\''+${service.serviceName}+'\');'">调用服务</button>
+                </h3>
+            </li>
 
+        </div>
 
+    </div>
 </div> <!-- /container -->
 
 
@@ -98,5 +91,17 @@
 <script src="/static/js/jquery.js"></script>
 <script src="/static/js/docs.min.js"></script>
 <script src="/static/js/bootstrap.js"></script>
+<script th:inline="javascript" type="text/javascript">
+    function send(s) {
+        var dataMap
+//        alert(s);
+        dataMap = "serviceName=" + s + "&funcName=say";
+        $.get("/test/callService?" + dataMap, function (data) {
+            $("#result").text(" "+data.result);
+            $("#status").text(data.status);
+            $("#time").text(data.consumTime+"ms");
+        })
+    }
+</script>
 </body>
 </html>

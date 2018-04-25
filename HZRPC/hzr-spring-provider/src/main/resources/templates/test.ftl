@@ -15,7 +15,7 @@
         <span th:text="${serviceModelList}"></span>
     </div>
 </div>
-<div th:if="${not#lists.isEmpty(serviceModelList)}">
+<div th:if="${not} #lists.isEmpty(serviceModelList)}">
     <div class="panel panel-primary">
         <div class="panel-heading">
             <h3 class="panel-title">列表</h3>

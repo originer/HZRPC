@@ -1,5 +1,7 @@
 <div>
     Service Server List
+        ${serviceResult.result}
+
 </div>
 
 <#list servers as server>

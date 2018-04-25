@@ -1,13 +1,16 @@
 package hzr.spring.provider.exmple;
 
-import hzr.spring.provider.bean.ClientFactoryBean;
+import com.google.common.base.Splitter;
+import hzr.common.bootstrap.ClientBuilder;
+import hzr.common.proxy.JDKProxy;
+import hzr.register.Constant;
 import hzr.spring.provider.mode.ServiceModel;
+import hzr.spring.provider.mode.ServiceProvider;
+import hzr.spring.provider.mode.ServiceResult;
 import lombok.extern.slf4j.Slf4j;
 import org.I0Itec.zkclient.ZkClient;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,7 +18,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.annotation.Resource;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,17 +29,17 @@ import java.util.List;
 @SpringBootApplication
 @RequestMapping("/test")
 public class SpringClientConfig {
-    @Bean
-    public IHello rpcClient() {
-        ClientFactoryBean<IHello> clientFactoryBean = new ClientFactoryBean<>();
-        clientFactoryBean.setZkConn("127.0.0.1:2181");
-        clientFactoryBean.setServiceName("HelloImpl");
-        clientFactoryBean.setServiceInterface(IHello.class);
-        return clientFactoryBean.getObject();//通过ClientBuilder获取Client实例
-    }
+//    @Bean
+//    public IServiceTest rpcClient() {
+//        ClientFactoryBean<IServiceTest> clientFactoryBean = new ClientFactoryBean<>();
+//        clientFactoryBean.setZkConn("127.0.0.1:2181");
+//        clientFactoryBean.setServiceName("HelloImpl");
+//        clientFactoryBean.setServiceInterface(IServiceTest.class);
+//        return clientFactoryBean.getObject();//通过ClientBuilder获取Client实例
+//    }
 
-    @Resource
-    private IHello rpcClient;
+//    @Resource
+//    private IServiceTest rpcClient;
 
     @RequestMapping("/list")
     public String getServerList(Model model) {
@@ -46,51 +50,71 @@ public class SpringClientConfig {
             for (String serviceName : services) {
                 ServiceModel serviceModel = new ServiceModel();
                 serviceModel.setServiceName(serviceName);
-//                List<ServiceProvider> serviceProviders = new ArrayList<ServiceProvider>();
-//                String servicePath = Constant.ZK_REGISTRY_PATH + "/" + serviceName;
-//                List<String> addressList = zkClient.getChildren(servicePath);
-//                if (!CollectionUtils.isEmpty(addressList)) {
-//                    for (String address : addressList) {
-//                        address = zkClient.readData(address);
-//                        ServiceProvider serviceProvider = new ServiceProvider();
-//                        List<String> serviceProviderPayLoadTokens = Splitter.on(":").splitToList(address);
-////                        serviceProvider.setIp(serviceProviderPayLoadTokens.get(0));
-////                        serviceProvider.setPort(serviceProviderPayLoadTokens.get(1));
-//                        serviceProviders.add(serviceProvider);
-//                    }
-//                }
-//                serviceModel.setServiceProviders(serviceProviders);
-                serviceModels.add(serviceModel);
-                model.addAttribute("service", serviceModel);
+                String servicePath = Constant.ZK_REGISTRY_PATH + "/" + serviceName;
+                List<String> addressList = zkClient.getChildren(servicePath);
+
+                if (addressList.size()==0) {
+                    zkClient.deleteRecursive(servicePath);
+                } else {
+                    ServiceProvider serviceProvider = new ServiceProvider();
+                    if (!CollectionUtils.isEmpty(addressList)) {
+                        for (String address : addressList) {
+                            address = zkClient.readData(servicePath + "/" + address);
+                            List<String> serviceProviderPayLoadTokens = Splitter.on(":").splitToList(address);
+                            serviceProvider.setIp(serviceProviderPayLoadTokens.get(0));
+                            serviceProvider.setPort(serviceProviderPayLoadTokens.get(1));
+                        }
+                    }
+                    serviceModel.setServiceProvider(serviceProvider);
+                    serviceModels.add(serviceModel);
+                }
             }
         }
-        model.addAttribute("services", serviceModels);
+        model.addAttribute("serviceList", serviceModels);
         String index = "index";
         return index;
     }
 
     @RequestMapping(value = "/index")
-    public String index(Model  model)
-    {
-        ServiceModel serviceModel = new ServiceModel();
-        serviceModel.setServiceName("testServiceModel");
-        List<ServiceModel> serviceModelList = new ArrayList<ServiceModel>();
-        serviceModelList.add(serviceModel);
-        model.addAttribute("serviceModelList",serviceModelList);
-        model.addAttribute("serviceModel",serviceModel);
-        return "test";
+    public String index(Model model) {
+//        ServiceModel serviceModel = new ServiceModel();
+//        serviceModel.setServiceName("testServiceModel");
+//        List<ServiceModel> serviceModelList = new ArrayList<ServiceModel>();
+//        serviceModelList.add(serviceModel);
+//        model.addAttribute("serviceModelList", serviceModelList);
+//        model.addAttribute("serviceModel", serviceModel);
+        return "index2";
     }
 
-    @RequestMapping("/hello")
+    @RequestMapping("/callService")
     @ResponseBody
-    public String hello(String say) {
-        long s = System.currentTimeMillis();
-        rpcClient.say(say);
-        long e = System.currentTimeMillis();
+    public ServiceResult callService(String serviceName,String funcName,Model model) {
 
-        log.info("调用服务耗时:{}",(e-s)+"ms");
-
-        return rpcClient.say(say);
+        IServiceTest client =  ClientBuilder.<IServiceTest>builder().zkConn("127.0.0.1:2181")
+                .serviceName(serviceName)
+                .serviceInterface(IServiceTest.class)
+                .clientProxyClass(JDKProxy.class)
+                .build();
+        Class c = client.getClass();//得到对象
+        try {
+            Method method = c.getMethod(funcName,String.class);
+            long s = System.currentTimeMillis();
+            Object result = method.invoke(client,"123");
+            long e = System.currentTimeMillis();
+            log.info("调用服务耗时:{}", (e - s) + "ms");
+            ServiceResult serviceResult = new ServiceResult();
+            serviceResult.setResult(result.toString());
+            serviceResult.setConsumTime(e-s);
+            serviceResult.setStatus(true);
+            return serviceResult;
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static void main(String[] args) {

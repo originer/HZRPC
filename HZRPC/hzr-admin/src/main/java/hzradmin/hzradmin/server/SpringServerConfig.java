@@ -2,13 +2,12 @@ package hzradmin.hzradmin.server;
 
 import hzr.spring.provider.anocation.RpcService;
 import hzr.spring.provider.bean.ServerFactoryBean;
-import hzr.spring.provider.exmple.IHello;
+import hzr.spring.provider.exmple.IServiceTest;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
@@ -25,7 +24,7 @@ public class SpringServerConfig implements ApplicationContextAware, Initializing
     public ServerFactoryBean serverFactoryBean() {
         final ServerFactoryBean serverFactoryBean = new ServerFactoryBean();
         serverFactoryBean.setPort(9090);
-        serverFactoryBean.setServiceInterface(IHello.class);
+        serverFactoryBean.setServiceInterface(IServiceTest.class);
         serverFactoryBean.setZkConn("127.0.0.1:2181");
         serverFactoryBean.setServiceMap(serviceMap);
 

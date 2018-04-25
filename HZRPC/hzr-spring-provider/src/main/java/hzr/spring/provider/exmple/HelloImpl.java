@@ -5,10 +5,10 @@ import hzr.spring.provider.anocation.RpcService;
 /**
  * Description:
  */
-@RpcService(value = IHello.class,serviceName = "HelloImpl")
-public class HelloImpl implements IHello {
+@RpcService(value = IServiceTest.class,serviceName = "Service1")
+public class HelloImpl implements IServiceTest {
 	public String say(String hello) {
-		return "return " + hello;
+		return "call service1 success!";
 	}
 
 	public int sum(int a, int b) {
