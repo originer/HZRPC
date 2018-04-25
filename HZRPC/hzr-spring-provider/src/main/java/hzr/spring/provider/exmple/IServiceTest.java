@@ -1,0 +1,17 @@
+package hzr.spring.provider.exmple;
+
+/**
+ * Description:
+ *
+ * @author liuzhengyang
+ * @version 1.0
+ * @since 2016-12-16
+ */
+
+public interface IServiceTest {
+
+	String say(String hello);
+
+	int sum(int a, int b);
+	int sum(Integer a, Integer b);
+}

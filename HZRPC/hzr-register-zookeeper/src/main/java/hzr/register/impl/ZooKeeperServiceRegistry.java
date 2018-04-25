@@ -6,18 +6,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.I0Itec.zkclient.ZkClient;
 
 /**
+ * ZooKeeper实现的服务注册中心
+ *
  * @author Zz
  **/
 @Slf4j
 public class ZooKeeperServiceRegistry implements ServiceRegistry {
-//    private static final Logger log = LoggerFactory.getLogger(ZooKeeperServiceRegistry.class);
-
     private final ZkClient zkClient;
 
     public ZooKeeperServiceRegistry(String zkAddress) {
         // 创建 ZooKeeper 客户端
-        zkClient = new ZkClient(zkAddress, Constant.ZK_SESSION_TIMEOUT, Constant.ZK_CONNECTION_TIMEOUT);
-        log.debug("connect zookeeper");
+        zkClient = new ZkClient(zkAddress);
     }
 
     @Override
@@ -38,5 +37,9 @@ public class ZooKeeperServiceRegistry implements ServiceRegistry {
         String addressPath = servicePath + "/address-";
         String addressNode = zkClient.createEphemeralSequential(addressPath, serviceAddress);
         log.debug("create address node: {}", addressNode);
+    }
+
+    @Override
+    public void unRegister() {
     }
 }

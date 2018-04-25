@@ -1,10 +1,13 @@
 package hzr.common.serialization;
 
+
+import hzr.common.serialization.spi.BaseServiceLoader;
+
 /**
- * @author Zz
- * 序列化方式基于SPI方式加载
- **/
+ *  序列化的入口,基于SPI方式
+ */
 public final class SerializerHolder {
+
     // SPI
     private static final Serializer serializer = BaseServiceLoader.load(Serializer.class);
 
