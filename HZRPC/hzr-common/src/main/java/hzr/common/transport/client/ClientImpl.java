@@ -145,7 +145,9 @@ public class ClientImpl implements Client {
             // 最后一起保存在这个ResponseMap中
 
             //poll(time):取走BlockingQueue里排在首位的对象,若不能立即取出,则可以等time参数规定的时间,取不到时返回null
-            return blockingQueue.poll(requestTimeoutMillis, TimeUnit.MILLISECONDS);
+
+            Response response = blockingQueue.poll(requestTimeoutMillis, TimeUnit.MILLISECONDS);
+            return response;
         } catch (InterruptedException e) {
             throw new RuntimeException("service" + serviceName + " method " + method + " timeout");
         } finally {

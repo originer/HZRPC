@@ -8,7 +8,7 @@ package hzr.spring.provider.exmple;
  * @since 2016-12-16
  */
 
-public interface IHello {
+public interface IServiceTest {
 
 	String say(String hello);
 

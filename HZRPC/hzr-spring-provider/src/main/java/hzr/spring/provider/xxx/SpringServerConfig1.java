@@ -18,14 +18,14 @@ import java.util.Map;
 
 @EnableAutoConfiguration
 @ComponentScan(basePackages = "hzr.spring.provider.*")
-public class SpringServerConfig implements ApplicationContextAware, InitializingBean {
+public class SpringServerConfig1 implements ApplicationContextAware, InitializingBean {
     private static Map<String, Object> serviceMap = new HashMap<>();
     @Bean
     public ServerFactoryBean serverFactoryBean() {
         final ServerFactoryBean serverFactoryBean = new ServerFactoryBean();
-        serverFactoryBean.setPort(9091);
+        serverFactoryBean.setPort(8009);
         serverFactoryBean.setServiceInterface(IServiceTest.class);
-        serverFactoryBean.setZkConn("127.0.0.1:2181");
+        serverFactoryBean.setZkConn("127.0.0.1:2182");
         serverFactoryBean.setServiceMap(serviceMap);
 
         new Thread(() -> {
@@ -39,7 +39,7 @@ public class SpringServerConfig implements ApplicationContextAware, Initializing
     }
 
     public static void main(String[] args) {
-        SpringApplication.run(SpringServerConfig.class);
+        SpringApplication.run(SpringServerConfig1.class,"--server.port=9999");
     }
     @Override
     public void afterPropertiesSet() throws Exception {
