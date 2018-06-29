@@ -1,12 +1,6 @@
 package hzr.spring.provider.mode;
 
-/**
- * Description:
- *
- * @author liuzhengyang
- * @version 1.0
- * @since 2017-01-28
- */
+
 public class ServiceModel {
 	private String serviceName;
 	private String startTime;
