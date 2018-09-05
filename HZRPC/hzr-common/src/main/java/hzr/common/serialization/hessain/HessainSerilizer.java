@@ -15,7 +15,7 @@ public class HessainSerilizer implements Serializer {
 
 
     @Override
-    public byte[] writeObject(Object data)  {
+    public byte[] writeObject(Object data) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         Hessian2Output out = new Hessian2Output(bos);
         try {
@@ -29,7 +29,7 @@ public class HessainSerilizer implements Serializer {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T readObject(byte[] data, Class<T> clz)  {
+    public <T> T readObject(byte[] data, Class<T> clz) {
         Hessian2Input input = new Hessian2Input(new ByteArrayInputStream(data));
         try {
             return (T) input.readObject(clz);
