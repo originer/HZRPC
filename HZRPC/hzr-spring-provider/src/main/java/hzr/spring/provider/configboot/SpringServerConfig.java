@@ -1,8 +1,8 @@
-package hzr.spring.provider.xxx;
+package hzr.spring.provider.configboot;
 
 import hzr.spring.provider.anocation.RpcService;
 import hzr.spring.provider.bean.ServerFactoryBean;
-import hzr.spring.provider.exmple.IServiceTest;
+import hzr.spring.provider.exmple.service.IServiceTest;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
@@ -27,7 +27,6 @@ public class SpringServerConfig implements ApplicationContextAware, Initializing
         serverFactoryBean.setServiceInterface(IServiceTest.class);
         serverFactoryBean.setZkConn("127.0.0.1:2181");
         serverFactoryBean.setServiceMap(serviceMap);
-
         new Thread(() -> {
             try {
                 serverFactoryBean.getObject();
@@ -38,9 +37,7 @@ public class SpringServerConfig implements ApplicationContextAware, Initializing
         return serverFactoryBean;
     }
 
-    public static void main(String[] args) {
-        SpringApplication.run(SpringServerConfig.class);
-    }
+
     @Override
     public void afterPropertiesSet() throws Exception {
         serverFactoryBean().start();
@@ -62,5 +59,9 @@ public class SpringServerConfig implements ApplicationContextAware, Initializing
                 serviceMap.put(serviceName, serviceBean);
             }
         }
+    }
+
+    public static void main(String[] args) {
+        SpringApplication.run(SpringServerConfig.class,"--server.port=9090");
     }
 }

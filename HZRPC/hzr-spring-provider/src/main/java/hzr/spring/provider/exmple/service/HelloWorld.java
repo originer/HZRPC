@@ -1,4 +1,4 @@
-package hzr.spring.provider.exmple;
+package hzr.spring.provider.exmple.service;
 
 import hzr.spring.provider.anocation.RpcService;
 

@@ -5,6 +5,7 @@ import hzr.common.protocol.Request;
 import hzr.common.protocol.Response;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,19 +13,18 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 public class RpcServerHandler extends SimpleChannelInboundHandler<Request> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RpcServerHandler.class);
     private final Map<String, Object> serviceMap;
     private static Map<String, Method> methodCache = new HashMap<>();
 
-    //此处传入service的实现类对象
     public RpcServerHandler(Map<String, Object> serviceMap) {
         this.serviceMap = serviceMap;
     }
 
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, Request request) throws Exception {
         //通过serviceName从serviceMap中取出实例
-        LOGGER.info("请求服务 requestId：{}，serviceName：{}", request.getRequestId(), request.getServiceName());
+        log.info("请求服务 requestId：{}，serviceName：{}", request.getRequestId(), request.getServiceName());
         Object service = serviceMap.get(request.getServiceName());
         Preconditions.checkNotNull(service);
 
@@ -53,7 +53,7 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<Request> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        LOGGER.error("Exception caught on {}, ", ctx.channel(), cause);
+        log.error("Exception caught on {}, ", ctx.channel(), cause);
         ctx.channel().close();
     }
 }

@@ -1,6 +1,7 @@
 package hzr.spring.provider.exmple;
 
 import hzr.spring.provider.anocation.RpcService;
+import hzr.spring.provider.exmple.service.IServiceTest;
 
 /**
  * @author Zz

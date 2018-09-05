@@ -1,4 +1,4 @@
-package hzr.spring.provider.mode;
+package hzr.spring.provider.model;
 
 
 public class ServiceModel {

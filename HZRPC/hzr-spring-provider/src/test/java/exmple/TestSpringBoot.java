@@ -1,7 +1,7 @@
 package exmple;
 
 import hzr.common.bootstrap.ClientBuilder;
-import hzr.spring.provider.exmple.IServiceTest;
+import hzr.spring.provider.exmple.service.IServiceTest;
 import org.junit.Test;
 
 /**

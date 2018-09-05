@@ -1,12 +1,6 @@
-package hzr.spring.provider.mode;
+package hzr.spring.provider.model;
 
-/**
- * Description:
- *
- * @author liuzhengyang
- * @version 1.0
- * @since 2017-01-28
- */
+
 public class ServiceProvider {
 	private String ip;
 	private String port;

@@ -1,5 +1,7 @@
 package hzr.spring.provider.exmple;
 
+import hzr.spring.provider.exmple.service.HelloWorld;
+
 /**
  */
 public class HelloWorldImpl implements HelloWorld {

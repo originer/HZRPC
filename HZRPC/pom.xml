@@ -11,6 +11,7 @@
     <modules>
         <module>hzr-common</module>
         <module>hzr-register-zookeeper</module>
+        <module>hzr-spring-provider</module>
     </modules>
 
 

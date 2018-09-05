@@ -18,26 +18,23 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
-
+@Slf4j
 public class ServerImpl implements Server {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServerImpl.class);
 
     private int port;
 
     /**
-     * 单服务注册，可以去掉
+     * 单服务注册
      */
     private Object serviceImpl;
     private String serviceName;
-
-    //TODO 改造成可以注册多个服务
 
     /**
      * 存放 服务名 与 服务对象 之间的映射关系
@@ -97,7 +94,7 @@ public class ServerImpl implements Server {
             ChannelFuture future = serverBootstrap.bind(port).sync();
             //接着注册服务
             registerService();
-            LOGGER.info("Server Started At {}", port);
+            log.info("Server Started At {}", port);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -115,7 +112,7 @@ public class ServerImpl implements Server {
         } else if (serviceMap.size() > 0) {
             serviceMap.forEach((k, v) -> {
                 serviceRegistry.register(k, serviceAddress);
-                LOGGER.info("注册服务 serviceName: {}", k);
+                log.info("注册服务 serviceName: {}", k);
             });
         }
     }
@@ -123,13 +120,13 @@ public class ServerImpl implements Server {
     @Override
     public void shutdown() {
         //关停相关服务
-        LOGGER.info("Shutting down server {}", serviceName);
+        log.info("Shutting down server {}", serviceName);
         bossGroup.shutdownGracefully();
         workerGroup.shutdownGracefully();
     }
 
     private void unRegister() {
-        LOGGER.info("unRegister zookeeper");
+        log.info("unRegister zookeeper");
 //        try {
 //            curatorFramework.delete().forPath(ZK_DATA_PATH+serviceName+"/"+localIp+":"+port);
 //        } catch (Exception e) {

@@ -1,12 +1,13 @@
 package hzr.spring.provider.exmple;
 
 import hzr.spring.provider.anocation.RpcService;
+import hzr.spring.provider.exmple.service.IServiceTest;
 
 /**
  * Description:
  */
 @RpcService(value = IServiceTest.class,serviceName = "Service1")
-public class HelloImpl implements IServiceTest {
+public class Service1 implements IServiceTest {
 	public String say(String hello) {
 		return "call service1 success!";
 	}

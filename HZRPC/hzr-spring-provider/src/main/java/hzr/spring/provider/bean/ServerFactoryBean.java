@@ -16,12 +16,9 @@ import java.util.Map;
 @Data
 public class ServerFactoryBean implements FactoryBean<Object> {
 
-    // 远程调用的接口
     private Class<?> serviceInterface;
     private Object serviceImpl;
-//    private String ip;
     private int port;
-//    private String serviceName;
     private String zkConn;
     private ServerImpl rpcServer;
 
@@ -33,9 +30,6 @@ public class ServerFactoryBean implements FactoryBean<Object> {
                 .port(port)
                 .zkConn(zkConn).build2();
         build.start();
-//        rpcServer = new ServerImpl(port, serviceImpl, serviceName);
-//        rpcServer.setZkConn(getZkConn());
-//        rpcServer.start();
     }
 
     public void destroy() {

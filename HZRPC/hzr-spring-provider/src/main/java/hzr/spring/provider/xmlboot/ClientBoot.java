@@ -1,7 +1,7 @@
-package hzr.spring.provider.boot;
+package hzr.spring.provider.xmlboot;
 
 import hzr.spring.provider.bean.ClientBean;
-import hzr.spring.provider.exmple.HelloWorld;
+import hzr.spring.provider.exmple.service.HelloWorld;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 

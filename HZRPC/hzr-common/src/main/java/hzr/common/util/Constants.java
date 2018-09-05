@@ -5,6 +5,6 @@ package hzr.common.util;
  **/
 public class Constants {
 
-  public static final String ZK_DATA_PATH = "/registry";
+    public static final String ZK_DATA_PATH = "/registry";
 
 }

@@ -36,6 +36,7 @@ public class ChannelFactory extends BasePooledObjectFactory<Channel> {
 
     /**
      * 创建一个新的Channel
+     *
      * @return
      */
     private Channel createNewConChannel() {

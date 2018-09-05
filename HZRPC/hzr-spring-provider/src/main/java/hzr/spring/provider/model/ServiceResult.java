@@ -1,8 +1,6 @@
-package hzr.spring.provider.mode;
+package hzr.spring.provider.model;
 
 import lombok.Data;
-
-import java.util.Date;
 
 /**
  * @author Zz

@@ -14,7 +14,7 @@
     <bean id="clientBean" class="hzr.spring.provider.bean.ClientBean">
         <constructor-arg name="zkConn" value="127.0.0.1:2181"/>
         <constructor-arg name="serviceName" value="HelloWorld"/>
-        <constructor-arg name="serviceInterface" value="hzr.spring.provider.exmple.HelloWorld"/>
+        <constructor-arg name="serviceInterface" value="hzr.spring.provider.exmple.service.HelloWorld"/>
     </bean>
     <bean id="helloWorld" class="hzr.spring.provider.exmple.HelloWorldImpl"/>
 

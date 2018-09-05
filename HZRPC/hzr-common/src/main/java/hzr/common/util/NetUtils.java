@@ -8,6 +8,7 @@ import java.util.Enumeration;
 public class NetUtils {
     /**
      * 获取本机IP地址
+     *
      * @return
      */
     public static String getLocalIp() {
@@ -19,7 +20,7 @@ public class NetUtils {
         return null;
     }
 
-    public static  InetAddress getLocalHostLANAddress() throws Exception {
+    public static InetAddress getLocalHostLANAddress() throws Exception {
         try {
             InetAddress candidateAddress = null;
             // 遍历所有的网络接口
@@ -50,6 +51,7 @@ public class NetUtils {
         }
         return null;
     }
+
     public static void main(String[] args) throws Exception {
         System.out.println(getLocalIp());
     }

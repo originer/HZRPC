@@ -1,4 +1,4 @@
-package hzr.spring.provider.boot;
+package hzr.spring.provider.xmlboot;
 
 import hzr.common.transport.server.Server;
 import hzr.spring.provider.bean.ServerBean;
