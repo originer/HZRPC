@@ -5,15 +5,17 @@ package hzr.common.serialization;
  */
 public interface Serializer {
 
-	/**
-	 * 将对象序列化成byte[]
-	 * @param obj
-	 * @return
-	 */
+    /**
+     * 将对象序列化成byte[]
+     *
+     * @param obj
+     * @return
+     */
     <T> byte[] writeObject(T obj);
 
     /**
      * 将byte数组反序列成对象
+     *
      * @param bytes
      * @param clazz
      * @return

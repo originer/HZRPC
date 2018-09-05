@@ -104,7 +104,7 @@ public class ClientImpl implements Client {
     }
 
     @Override
-    public Response sendMessage(Class<?> clazz, Method method, Object[] args) {
+    public Response invokeMethod(Class<?> clazz, Method method, Object[] args) {
         //编写 request 信息
         Request request = new Request();
         request.setRequestId(atomicLong.incrementAndGet());
@@ -136,7 +136,7 @@ public class ClientImpl implements Client {
             return response;
         }
         try {
-            //这里要先对每个请求申请blockingQueue，否则高并发环境下RpcClientHandler可能获取不blockingQueue
+            //这里要先对每个请求申请blockingQueue，否则高并发环境下RpcClientHandler可能获取不到response
             BlockingQueue<Response> blockingQueue = new ArrayBlockingQueue<>(1);
             ResponseMapCache.responseMap.put(request.getRequestId(), blockingQueue);
             channel.writeAndFlush(request);
@@ -162,14 +162,9 @@ public class ClientImpl implements Client {
         }
     }
 
-
-//    public RPCFuture sendMessageByAnsc(Class<?> clazz, Method method, Object[] args) {
-//
-//    }
-
     @Override
     public <T> T proxyInterface(Class<T> serviceInterface) {
-//        默认使用cglib
+        //默认使用cglib
         if (clientProxyClass == null) {
             clientProxyClass = CGLIBProxy.class;
         }
@@ -184,7 +179,6 @@ public class ClientImpl implements Client {
     @Override
     public void close() {
         //注意要关三处地方，一个是先关闭zookeeper的连接，另一个是channel池对象，最后是netty的断开关闭
-
         try {
             for (ChannelHolder cw : channelCachePool) {
                 cw.close();
