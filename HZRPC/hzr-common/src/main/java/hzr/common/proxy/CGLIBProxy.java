@@ -7,6 +7,10 @@ import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 
 import java.lang.reflect.Method;
+
+/**
+ * CGLIB代理
+ */
 @Slf4j
 public class CGLIBProxy implements RPCProxy {
 
@@ -39,6 +43,17 @@ public class CGLIBProxy implements RPCProxy {
         }
 
         /**
+         * 加入rpc客户端和传入所调用服务的接口
+         */
+        private Client client;
+        private Class<?> serviceInterface;
+
+        public CglibInteceptor(Client client, Class<?> serviceInterface) {
+            this.client = client;
+            this.serviceInterface = serviceInterface;
+        }
+
+        /**
          * 针对这几个方法做相应的策略
          *
          * @param proxy
@@ -54,17 +69,6 @@ public class CGLIBProxy implements RPCProxy {
 
         private String proxyToString(Object proxy) {
             return proxy.getClass().getName() + '@' + Integer.toHexString(proxy.hashCode());
-        }
-
-        /**
-         * 加入rpc客户端和传入所调用服务的接口
-         */
-        private Client client;
-        private Class<?> serviceInterface;
-
-        public CglibInteceptor(Client client, Class<?> serviceInterface) {
-            this.client = client;
-            this.serviceInterface = serviceInterface;
         }
 
         @Override

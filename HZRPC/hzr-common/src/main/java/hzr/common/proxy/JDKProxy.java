@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 /**
+ * JDK代理
  * @author Zz
  **/
 public class JDKProxy implements RPCProxy {
@@ -26,7 +27,7 @@ public class JDKProxy implements RPCProxy {
     }
 
     /**
-     * 不是所有的响应都具备equals,toString,hashCode方法，为了防止调用者调用产生错误，对这三个方法做特殊处理
+     * 对于hashCode,euqals,toString方法,默认采用Object自带的方法
      * @param client
      * @param serviceInterface
      * @param <T>
@@ -35,23 +36,17 @@ public class JDKProxy implements RPCProxy {
     @Override
     public <T> T proxyInterface(final Client client, final Class<T> serviceInterface) {
         Object proxyInstance = Proxy.newProxyInstance(ClientImpl.class.getClassLoader(),
-                new Class[]{serviceInterface}, new InvocationHandler() {
-                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                        if (hashCodeMethod.equals(method)) {
-                            return proxyHashCode(proxy);
-                        }
-                        if (equalsMethod.equals(method)) {
-                            return proxyEquals(proxy, args[0]);
-                        }
-                        if (toStringMethod.equals(method)) {
-                            return proxyToString(proxy);
-                        }
-                        try {
-                            return client.sendMessage(serviceInterface, method, args).getResponse();
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
+                new Class[]{serviceInterface}, (proxy, method, args) -> {
+                    if (hashCodeMethod.equals(method)) {
+                        return proxyHashCode(proxy);
                     }
+                    if (equalsMethod.equals(method)) {
+                        return proxyEquals(proxy, args[0]);
+                    }
+                    if (toStringMethod.equals(method)) {
+                        return proxyToString(proxy);
+                    }
+                    return client.sendMessage(serviceInterface, method, args).getResponse();
                 });
         return (T) proxyInstance;
     }
