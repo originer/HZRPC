@@ -84,7 +84,7 @@ public class CGLIBProxy implements RPCProxy {
                 return proxyToString(proxy);
             }
             log.info("代理模块进行调用");
-            Object response = client.sendMessage(serviceInterface, method, args).getResponse();
+            Object response = client.invokeMethod(serviceInterface, method, args).getResponse();
             if (response == null) {
                 throw new RuntimeException("队列中没有响应信息");
             }

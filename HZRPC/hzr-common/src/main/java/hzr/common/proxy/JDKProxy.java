@@ -3,7 +3,6 @@ package hzr.common.proxy;
 import hzr.common.transport.client.Client;
 import hzr.common.transport.client.ClientImpl;
 
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
@@ -46,7 +45,7 @@ public class JDKProxy implements RPCProxy {
                     if (toStringMethod.equals(method)) {
                         return proxyToString(proxy);
                     }
-                    return client.sendMessage(serviceInterface, method, args).getResponse();
+                    return client.invokeMethod(serviceInterface, method, args).getResponse();
                 });
         return (T) proxyInstance;
     }
