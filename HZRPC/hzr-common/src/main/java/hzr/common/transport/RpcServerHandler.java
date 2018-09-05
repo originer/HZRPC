@@ -9,11 +9,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
 
 public class RpcServerHandler extends SimpleChannelInboundHandler<Request> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RpcServerHandler.class);
     private final Map<String, Object> serviceMap;
+    private static Map<String, Method> methodCache = new HashMap<>();
+
     //此处传入service的实现类对象
     public RpcServerHandler(Map<String, Object> serviceMap) {
         this.serviceMap = serviceMap;
@@ -21,7 +24,7 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<Request> {
 
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, Request request) throws Exception {
         //通过serviceName从serviceMap中取出实例
-        LOGGER.info("请求服务 requestId：{}，serviceName：{}", request.getRequestId(),request.getServiceName());
+        LOGGER.info("请求服务 requestId：{}，serviceName：{}", request.getRequestId(), request.getServiceName());
         Object service = serviceMap.get(request.getServiceName());
         Preconditions.checkNotNull(service);
 
@@ -31,16 +34,23 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<Request> {
         Class<?>[] parameterTypes = request.getParameterTypes();
         long requestId = request.getRequestId();
 
-        Method method = service.getClass().getDeclaredMethod(methodName, parameterTypes);
-        method.setAccessible(true);
-        Object invoke = method.invoke(service, params);
+        Object invokeResult;
+        if (methodCache.containsKey(methodName)) {
+            invokeResult = methodCache.get(methodName).invoke(service, params);
+        } else {
+            Method method = service.getClass().getDeclaredMethod(methodName, parameterTypes);
+            method.setAccessible(true);
+            invokeResult = method.invoke(service, params);
+            methodCache.put(methodName, method);
+        }
 
         //封装响应
         Response response = new Response();
         response.setRequestId(requestId);
-        response.setResponse(invoke);
+        response.setResponse(invokeResult);
         channelHandlerContext.pipeline().writeAndFlush(response);
     }
+
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         LOGGER.error("Exception caught on {}, ", ctx.channel(), cause);
