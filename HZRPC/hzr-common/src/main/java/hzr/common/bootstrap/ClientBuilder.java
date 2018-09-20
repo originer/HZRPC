@@ -16,8 +16,9 @@ public class ClientBuilder<T> {
     private String zkConn;
     private Class<T> serviceInterface;
     private  int requestTimeoutMillis = 10000;
-    //TODO 添加支持多种代理方式
     private  Class<? extends RPCProxy> clientProxyClass = CGLIBProxy.class;
+    private int STRATEGY;
+
     public static  <T> ClientBuilder<T> builder() {
         return new ClientBuilder<>();
     }
@@ -41,6 +42,11 @@ public class ClientBuilder<T> {
         this.clientProxyClass = clientProxyClass;
         return this;
     }
+    public ClientBuilder<T> strategy(int STRATEGY) {
+        this.STRATEGY = STRATEGY;
+        return this;
+    }
+
     public T build() {
         Preconditions.checkNotNull(serviceInterface);
         Preconditions.checkNotNull(zkConn);
@@ -50,6 +56,7 @@ public class ClientBuilder<T> {
         client.setZkConn(this.zkConn);
         client.setRequestTimeoutMillis(this.requestTimeoutMillis);
         client.setClientProxyClass(clientProxyClass);
+        client.setSTRATEGY(STRATEGY);
         client.init();
         log.info("客户端创建成功");
         return client.proxyInterface(this.serviceInterface);

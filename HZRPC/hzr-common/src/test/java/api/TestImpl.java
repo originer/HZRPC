@@ -5,8 +5,19 @@ package api;
  */
 
 public class TestImpl implements ITest {
+
+	private String service;
+
+	public TestImpl(String service) {
+		this.service = service;
+	}
+
+	public TestImpl() {
+	}
+
 	public String say(String hello) {
-		return "HELLOIMPL 1 " + hello;
+		System.out.println(hello);
+		return "service:"+service + hello;
 	}
 
 	public int sum(int a, int b) {

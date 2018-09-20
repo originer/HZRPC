@@ -5,16 +5,20 @@ import hzr.common.protocol.Response;
 import hzr.common.proxy.CGLIBProxy;
 import hzr.common.proxy.RPCProxy;
 import hzr.common.transport.ChannelHolder;
+import hzr.common.util.Constants;
 import hzr.common.util.ResponseMapCache;
 import hzr.register.impl.ZooKeeperServiceDiscovery;
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -28,6 +32,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * 根据channel = channelHolder.getChannelObjectPool().borrowObject();得到channel
  * 将请求写入channel并刷出去channel.writeAndFlush(request);
  */
+@Slf4j
 public class ClientImpl implements Client {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientImpl.class);
     //用于生成请求序列号
@@ -38,7 +43,8 @@ public class ClientImpl implements Client {
     private int requestTimeoutMillis = 10000;
     private EventLoopGroup eventLoopGroup = new NioEventLoopGroup(2);
     private String zkConn;
-
+    //select channel 的策略，默认采用顺序选取
+    private int STRATEGY = Constants.SELECT_IN_ORDER;
     private String serviceAddress;
     // 代理方式
     private Class<? extends RPCProxy> clientProxyClass;
@@ -54,7 +60,7 @@ public class ClientImpl implements Client {
 
     public void init() {
         ZooKeeperServiceDiscovery zkDiscover = new ZooKeeperServiceDiscovery(getZkConn());
-            //TODO 此处可以添加verision做负载均衡
+        //TODO 此处可以添加verision做负载均衡
         serviceAddress = zkDiscover.discover(serviceName);
         LOGGER.debug("discover service: {} => {}", serviceName, serviceAddress);
 
@@ -86,16 +92,25 @@ public class ClientImpl implements Client {
     }
 
     private ChannelHolder selectChannel(String conn) {
-//        TODO 这里的工作交由ZooKeeper处理
-        Random random = new Random();
-        //同一个服务下有好几个链接地址的实现，那就选一个就是，其实为集群部署考虑，
+        //添加服务选择策略
         int size = channelCachePool.size();
+        log.info("channel连接池中的连接数量：{}",size);
+        List<ChannelHolder> channelHolderList = new ArrayList<>();
+
         for (int i = 0; i < size; i++) {
             if (channelCachePool.get(i).getConnStr().equals(conn)) {
-                return channelCachePool.get(i);
+                if (STRATEGY == Constants.SELECT_IN_ORDER) {
+                    return channelCachePool.get(i);
+                } else if (STRATEGY == Constants.RANDOMLY_SELECTED) {
+                    channelHolderList.add(channelCachePool.get(i));
+                }
             }
         }
-        return null;
+        log.info("可用连接数量：{}",channelHolderList.size());
+
+        Random random = new Random();
+        int rIndex = random.nextInt(channelHolderList.size());
+        return channelHolderList.get(rIndex);
     }
 
 
@@ -116,13 +131,13 @@ public class ClientImpl implements Client {
         request.setServiceName(serviceName);
         //从CopyOnWriteArrayList容器中根据服务名获取可用的channel连接
         ChannelHolder channelHolder = selectChannel(serviceAddress);
+        log.info("获取可用的Channel connectStr:{}",channelHolder.getConnStr());
         if (channelHolder == null) {
             Response response = new Response();
             RuntimeException runtimeException = new RuntimeException("Channel is not active now");
             response.setThrowable(runtimeException);
             return response;
         }
-        //当channel的配置链接不为空的时候，就可以取到channel了
         Channel channel = null;
         try {
             channel = channelHolder.getChannelObjectPool().borrowObject();
@@ -145,9 +160,7 @@ public class ClientImpl implements Client {
             // 最后一起保存在这个ResponseMap中
 
             //poll(time):取走BlockingQueue里排在首位的对象,若不能立即取出,则可以等time参数规定的时间,取不到时返回null
-
-            Response response = blockingQueue.poll(requestTimeoutMillis, TimeUnit.MILLISECONDS);
-            return response;
+            return blockingQueue.poll(requestTimeoutMillis, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             throw new RuntimeException("service" + serviceName + " method " + method + " timeout");
         } finally {
@@ -204,5 +217,12 @@ public class ClientImpl implements Client {
         this.requestTimeoutMillis = requestTimeoutMillis;
     }
 
+    public int getSTRATEGY() {
+        return STRATEGY;
+    }
+
+    public void setSTRATEGY(int STRATEGY) {
+        this.STRATEGY = STRATEGY;
+    }
 
 }

@@ -32,4 +32,7 @@ public class ChannelHolder {
         channelObjectPool.close();
     }
 
+    public ObjectPool<Channel> getChannelObjectPool() {
+        return channelObjectPool;
+    }
 }
