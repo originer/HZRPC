@@ -8,6 +8,11 @@
 - 服务注册发现中心使用ZooKeeper实现
 - 支持SpringBoot快速启动
 
+**优化列表**
+- [ ] 引入disruptor框架，把事件处理从netty的工作线程中转移到disruptor中处理
+
+
+
 **使用说明**
 
 1. 首先启动ZooKeeper客户端，使用2181默认端口即可。
