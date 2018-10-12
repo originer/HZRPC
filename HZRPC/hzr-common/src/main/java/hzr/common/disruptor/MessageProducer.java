@@ -6,6 +6,8 @@ import hzr.common.protocol.TranslatorData;
 import hzr.common.protocol.TranslatorDataWapper;
 import io.netty.channel.ChannelHandlerContext;
 
+import java.util.Map;
+
 public class MessageProducer {
 
 	private String producerId;
@@ -23,6 +25,18 @@ public class MessageProducer {
 			TranslatorDataWapper wapper = ringBuffer.get(sequence);
 			wapper.setData(data);
 			wapper.setCtx(ctx);
+		} finally {
+			ringBuffer.publish(sequence);
+		}
+	}
+
+	public void onData(TranslatorData data, ChannelHandlerContext ctx,	Map<String, Object> serviceMap) {
+		long sequence = ringBuffer.next();
+		try {
+			TranslatorDataWapper wapper = ringBuffer.get(sequence);
+			wapper.setData(data);
+			wapper.setCtx(ctx);
+			wapper.setServiceMap(serviceMap);
 		} finally {
 			ringBuffer.publish(sequence);
 		}

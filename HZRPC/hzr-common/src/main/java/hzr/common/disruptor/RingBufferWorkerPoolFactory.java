@@ -41,7 +41,7 @@ public class RingBufferWorkerPoolFactory {
         //2.设置序号栅栏
         this.sequenceBarrier = this.ringBuffer.newBarrier();
         //3.设置工作池
-        this.workerPool = new WorkerPool<TranslatorDataWapper>(this.ringBuffer,
+        this.workerPool = new WorkerPool<>(this.ringBuffer,
                 this.sequenceBarrier,
                 new EventExceptionHandler(), messageConsumers);
         //4 把所构建的消费者置入池中
@@ -51,7 +51,7 @@ public class RingBufferWorkerPoolFactory {
         //5 添加我们的sequences
         this.ringBuffer.addGatingSequences(this.workerPool.getWorkerSequences());
         //6 启动我们的工作池
-        this.workerPool.start(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() / 2));
+        this.workerPool.start(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
     }
 
     public MessageProducer getMessageProducer(String producerId) {

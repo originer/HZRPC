@@ -1,10 +1,15 @@
 package hzr.common.transport.client;
 
+import com.lmax.disruptor.BlockingWaitStrategy;
+import com.lmax.disruptor.dsl.ProducerType;
+import hzr.common.disruptor.MessageConsumer;
+import hzr.common.disruptor.RingBufferWorkerPoolFactory;
 import hzr.common.protocol.Request;
 import hzr.common.protocol.Response;
 import hzr.common.proxy.CGLIBProxy;
 import hzr.common.proxy.RPCProxy;
 import hzr.common.transport.ChannelHolder;
+import hzr.common.transport.server.MessageConsumerImpl4Server;
 import hzr.common.util.Constants;
 import hzr.common.util.ResponseMapCache;
 import hzr.register.impl.ZooKeeperServiceDiscovery;
@@ -52,7 +57,7 @@ public class ClientImpl implements Client {
     // 缓存
     // 存放ChannelHolder到一个CopyOnWriteArrayList中，这个本就是读多写少的场景(服务注册后很少会发生状态改变)，所以很适用
     // CopyOnWriteArrayList容器即写时复制的容器，可以做到读写分离，在高并发的情况下不需要上锁
-    public static CopyOnWriteArrayList<ChannelHolder> channelCachePool = new CopyOnWriteArrayList<>();
+    private static CopyOnWriteArrayList<ChannelHolder> channelCachePool = new CopyOnWriteArrayList<>();
 
     public ClientImpl(String serviceName) {
         this.serviceName = serviceName;
@@ -75,6 +80,17 @@ public class ClientImpl implements Client {
         if (!containThis) {
             addNewChannel(serviceName, serviceAddress);
         }
+
+        MessageConsumer[] conusmers = new MessageConsumer[8];
+        for (int i = 0; i < conusmers.length; i++) {
+            MessageConsumer messageConsumer = new MessageConsumerImpl4Client("code:clientId:" + i);
+            conusmers[i] = messageConsumer;
+        }
+        RingBufferWorkerPoolFactory.getInstance().initAndStart(ProducerType.MULTI,
+                1024 * 1024,
+                //new YieldingWaitStrategy(),
+                new BlockingWaitStrategy(),
+                conusmers);
     }
 
     private void addNewChannel(String serviceName, String serviceAddress) {
@@ -94,7 +110,7 @@ public class ClientImpl implements Client {
     private ChannelHolder selectChannel(String conn) {
         //添加服务选择策略
         int size = channelCachePool.size();
-        log.info("channel连接池中的连接数量：{}",size);
+        log.info("channel连接池中的连接数量：{}", size);
         List<ChannelHolder> channelHolderList = new ArrayList<>();
 
         for (int i = 0; i < size; i++) {
@@ -106,7 +122,7 @@ public class ClientImpl implements Client {
                 }
             }
         }
-        log.info("可用连接数量：{}",channelHolderList.size());
+        log.info("可用连接数量：{}", channelHolderList.size());
 
         Random random = new Random();
         int rIndex = random.nextInt(channelHolderList.size());
@@ -119,7 +135,7 @@ public class ClientImpl implements Client {
     }
 
     @Override
-    public Response invokeMethod(Class<?> clazz, Method method, Object[] args) {
+    public Response invokeMethod(Class<?> clazz, Method method, Object[] args) throws Exception {
         //编写 request 信息
         Request request = new Request();
         request.setRequestId(atomicLong.incrementAndGet());
@@ -131,19 +147,17 @@ public class ClientImpl implements Client {
         request.setServiceName(serviceName);
         //从CopyOnWriteArrayList容器中根据服务名获取可用的channel连接
         ChannelHolder channelHolder = selectChannel(serviceAddress);
-        log.info("获取可用的Channel connectStr:{}",channelHolder.getConnStr());
-        if (channelHolder == null) {
+
+        log.info("获取可用的Channel connectStr:{}", channelHolder.getConnStr());
+        if (channelHolder.getChannelObjectPool().getNumIdle() < 0) {
             Response response = new Response();
             RuntimeException runtimeException = new RuntimeException("Channel is not active now");
             response.setThrowable(runtimeException);
             return response;
         }
-        Channel channel = null;
-        try {
-            channel = channelHolder.getChannelObjectPool().borrowObject();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
+        Channel channel = channelHolder.getChannelObjectPool().borrowObject();
+
         if (channel == null) {
             Response response = new Response();
             RuntimeException runtimeException = new RuntimeException("Channel is not available now");
@@ -151,6 +165,7 @@ public class ClientImpl implements Client {
             return response;
         }
         try {
+            //TODO 把Queue替换成disrutor框架
             //这里要先对每个请求申请blockingQueue，否则高并发环境下RpcClientHandler可能获取不到response
             BlockingQueue<Response> blockingQueue = new ArrayBlockingQueue<>(1);
             ResponseMapCache.responseMap.put(request.getRequestId(), blockingQueue);
@@ -164,12 +179,7 @@ public class ClientImpl implements Client {
         } catch (InterruptedException e) {
             throw new RuntimeException("service" + serviceName + " method " + method + " timeout");
         } finally {
-            try {
-                //拿出去的channel记得还回去
-                channelHolder.getChannelObjectPool().returnObject(channel);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            channelHolder.getChannelObjectPool().returnObject(channel);
             //删除此键值对，help GC
             ResponseMapCache.responseMap.remove(request.getRequestId());
         }

@@ -1,25 +1,22 @@
 
 import api.TestImpl;
 import api.ITest;
-import api.TestImpl2;
 import hzr.common.bootstrap.ClientBuilder;
 import hzr.common.bootstrap.ServerBuilder;
-import hzr.common.proxy.CGLIBProxy;
 import hzr.common.proxy.JDKProxy;
-import hzr.common.proxy.RPCProxy;
 import hzr.common.transport.server.Server;
+import hzr.common.util.Constants;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Stream;
 
 /**
  */
@@ -36,16 +33,12 @@ public class ClientBuilderTest {
     public static void before() throws Exception {
         Map<String, Object> serviceMap1 = new HashMap<>();
         Map<String, Object> serviceMap2 = new HashMap<>();
-        Map<String, Object> serviceMap3 = new HashMap<>();
+        //Map<String, Object> serviceMap3 = new HashMap<>();
         serviceMap1.put("s1",new TestImpl());
-//        serviceMap1.put("s2",new TestImpl());
-//        serviceMap1.put("s3",new TestImpl());
-//        serviceMap1.put("s4",new TestImpl());
+        serviceMap1.put("s2",new TestImpl("s2"));
+        serviceMap1.put("s3",new TestImpl());
 
-        serviceMap2.put("s1",new TestImpl());
-        serviceMap2.put("s2",new TestImpl());
-//        serviceMap2.put("s3",new TestImpl());
-        serviceMap3.put("s3",new TestImpl2());
+
 
         Server testBuilder = ServerBuilder.builder()
                 .port(8998)
@@ -54,24 +47,32 @@ public class ClientBuilderTest {
                 .build2();
         testBuilder.start();
 
-//        Server testBuilder1 = ServerBuilder.builder()
-//                .port(8999)
-//                .zkConn("127.0.0.1:2182")
-//                .serviceMap(serviceMap2)
-//                .build2();
-//        testBuilder1.start();
-//        Server testBuilder2 = ServerBuilder.builder()
-//                .port(9000)
-//                .zkConn("127.0.0.1:2183")
-//                .serviceMap(serviceMap3)
-//                .build2();
-//        testBuilder2.start();
+        //serviceMap2.put("s1",new TestImpl("s2"));
+        //serviceMap2.put("s2",new TestImpl("s2"));
+        //serviceMap2.put("s3",new TestImpl("s2"));
+        //serviceMap2.put("s4",new TestImpl("s2"));
+
+        //Server testBuilder1 = ServerBuilder.builder()
+        //        .port(8999)
+        //        .zkConn("127.0.0.1:2182")
+        //        .serviceMap(serviceMap2)
+        //        .build2();
+        //testBuilder1.start();
+        //
+        //serviceMap3.put("s3",new TestImpl2());
+        //Server testBuilder2 = ServerBuilder.builder()
+        //        .port(9000)
+        //        .zkConn("127.0.0.1:2183")
+        //        .serviceMap(serviceMap3)
+        //        .build2();
+        //testBuilder2.start();
     }
 
-//    @AfterClass
-//    public static void after() throws Exception {
-//        testBuilder.shutdown();
-//    }
+
+    //@AfterClass
+    //public static void after() throws Exception {
+    //    testBuilder.shutdown();
+    //}
 
 
 
@@ -90,8 +91,6 @@ public class ClientBuilderTest {
                 .serviceInterface(ITest.class).build();
         String result = hello.say("test1");
         System.out.println(result);
-//
-
 
         ITest hello2 = ClientBuilder.<ITest>builder().zkConn("127.0.0.1:2181")
                 .serviceName("s1")
@@ -99,7 +98,6 @@ public class ClientBuilderTest {
         String result2 = hello2.say("test2");
         System.out.println(result2);
 
-//
         ITest hello3 = ClientBuilder.<ITest>builder().zkConn("127.0.0.1:2181")
                 .serviceName("s1")
                 .serviceInterface(ITest.class).build();
@@ -119,8 +117,8 @@ public class ClientBuilderTest {
                 .serviceInterface(ITest.class).build();
         int a  = hello3.sum(1,2);
 
-//        String result3 = hello3.say("test3");
-        System.out.println(hello3.toString());
+        String result3 = hello3.say("test3");
+        System.out.println(result3);
 
     }
 
@@ -135,8 +133,8 @@ public class ClientBuilderTest {
                 .clientProxyClass(JDKProxy.class).build();
         int a  = hello3.sum(1,2);
 
-//        String result3 = hello3.say("test3");
-        System.out.println(hello3.toString());
+        String result3 = hello3.say("test3");
+        System.out.println(result3);
 
     }
 
@@ -162,14 +160,13 @@ public class ClientBuilderTest {
             arr.add(e-s);
             n+=(e-s);
         }
-        System.out.println("调用10000次耗费时间/10组 :"+arr+"\n 平均每次调用耗费时间:"+ n);
+        System.out.println("调用10000次耗费时间/10组 :"+arr+"\n 平均每次调用耗费时间:"+ n/100000);
 //        System.out.println("p"arr);
 
     }
 
     @Test
     public void testTransport2(){
-
         ITest hello1 =  ClientBuilder.<ITest>builder().zkConn("127.0.0.1:2181")
                 .serviceName("s1")
                 .serviceInterface(ITest.class)
@@ -200,5 +197,42 @@ public class ClientBuilderTest {
         }
     }
 
+    @Test
+    public void testStrategy() {
+        //ITest test1 =  ClientBuilder.<ITest>builder().zkConn("127.0.0.1:2182")
+        //        .serviceName("s1")
+        //        .serviceInterface(ITest.class)
+        //        .clientProxyClass(JDKProxy.class)
+        //        .strategy(Constants.RANDOMLY_SELECTED)
+        //        .build();
 
+        ITest test = ClientBuilder.<ITest>builder().zkConn("127.0.0.1:2182")
+                .serviceName("s2")
+                .serviceInterface(ITest.class)
+                .clientProxyClass(JDKProxy.class)
+                .strategy(Constants.RANDOMLY_SELECTED)
+                .build();
+        //for (int i = 0; i < 10; i++) {
+        System.out.println(test.say("test"));
+        //}
+    }
+
+    @Test
+    public void testDisrutor() {
+        ITest test = ClientBuilder.<ITest>builder().zkConn("127.0.0.1:2182")
+                .serviceName("s2")
+                .serviceInterface(ITest.class)
+                .clientProxyClass(JDKProxy.class)
+                .strategy(Constants.RANDOMLY_SELECTED)
+                .build();
+        System.out.println(test.say("test"));
+        //long s  = System.currentTimeMillis();
+        //for (int i = 0; i < 100000; i++) {
+        //    System.out.println(test.say("test"));
+        //
+        //}
+        //long e = System.currentTimeMillis();
+        //System.out.println("调用10W次服务耗时："+(e-s)+"  平均耗时："+(e-s)/100000);
+
+    }
 }
