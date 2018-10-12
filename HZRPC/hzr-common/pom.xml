@@ -134,6 +134,13 @@
             <version>3.4.2</version>
         </dependency>
 
+        <!-- 顺序uuid -->
+        <dependency>
+            <groupId>com.fasterxml.uuid</groupId>
+            <artifactId>java-uuid-generator</artifactId>
+            <version>3.1.4</version>
+        </dependency>
+
         <dependency>
             <groupId>HZRPC</groupId>
             <artifactId>hzr-register-zookeeper</artifactId>
