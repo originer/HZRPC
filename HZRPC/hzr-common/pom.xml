@@ -111,11 +111,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
-        <!--&lt;!&ndash; Apache Commons Collections &ndash;&gt;-->
-        <!--<dependency>-->
-        <!--<groupId>org.apache.commons</groupId>-->
-        <!--<artifactId>commons-collections4</artifactId>-->
-        <!--</dependency>-->
 
         <!--test junit-->
         <dependency>
@@ -132,6 +127,12 @@
             <version>2.4.2</version>
         </dependency>
 
+        <!-- 无锁并行框架 -->
+        <dependency>
+            <groupId>com.lmax</groupId>
+            <artifactId>disruptor</artifactId>
+            <version>3.4.2</version>
+        </dependency>
 
         <dependency>
             <groupId>HZRPC</groupId>
