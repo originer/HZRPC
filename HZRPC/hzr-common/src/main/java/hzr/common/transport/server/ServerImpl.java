@@ -1,7 +1,11 @@
 package hzr.common.transport.server;
 
+import com.lmax.disruptor.BlockingWaitStrategy;
+import com.lmax.disruptor.dsl.ProducerType;
 import hzr.common.codec.V2.RPCDecoder;
 import hzr.common.codec.V2.RPCEncoder;
+import hzr.common.disruptor.MessageConsumer;
+import hzr.common.disruptor.RingBufferWorkerPoolFactory;
 import hzr.common.protocol.Request;
 import hzr.common.protocol.Response;
 import hzr.common.transport.RpcServerHandler;
@@ -13,18 +17,16 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+
 @Slf4j
 public class ServerImpl implements Server {
 
@@ -76,12 +78,25 @@ public class ServerImpl implements Server {
 
     @Override
     public void start() {
+
+        MessageConsumer[] consumers = new MessageConsumer[4];
+        for (int i = 0; i < consumers.length; i++) {
+            MessageConsumer messageConsumer = new MessageConsumerImpl4Server("code:serverId:" + i);
+            consumers[i] = messageConsumer;
+        }
+
+        RingBufferWorkerPoolFactory.getInstance("server").initAndStart(ProducerType.MULTI,
+                1024 * 1024,
+                //new YieldingWaitStrategy(),
+                new BlockingWaitStrategy(),
+                consumers);
+
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
                 .childHandler(new ChannelInitializer<NioSocketChannel>() {
                     @Override
-                    protected void initChannel(NioSocketChannel socketChannel) throws Exception {
+                    protected void initChannel(NioSocketChannel socketChannel) {
                         socketChannel.pipeline()
                                 .addLast(new LoggingHandler(LogLevel.INFO))
                                 .addLast(new RPCDecoder(Request.class))
@@ -127,11 +142,11 @@ public class ServerImpl implements Server {
 
     private void unRegister() {
         log.info("unRegister zookeeper");
-//        try {
-//            curatorFramework.delete().forPath(ZK_DATA_PATH+serviceName+"/"+localIp+":"+port);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+        //try {
+        //    curatorFramework.delete().forPath(ZK_DATA_PATH+serviceName+"/"+localIp+":"+port);
+        //} catch (Exception e) {
+        //    e.printStackTrace();
+        //}
     }
 
     public String getZkConn() {

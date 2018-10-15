@@ -5,7 +5,6 @@ import com.google.common.base.Preconditions;
 import hzr.common.disruptor.MessageConsumer;
 import hzr.common.protocol.Request;
 import hzr.common.protocol.Response;
-import hzr.common.protocol.TranslatorData;
 import hzr.common.protocol.TranslatorDataWapper;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +52,7 @@ public class MessageConsumerImpl4Server extends MessageConsumer {
 		response.setRequestId(requestId);
 		response.setResponse(invokeResult);
 
-		ctx.writeAndFlush(response);
+		ctx.pipeline().writeAndFlush(response);
 	}
 
 }

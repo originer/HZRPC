@@ -9,7 +9,8 @@
 - 支持SpringBoot快速启动
 
 **优化列表**
-- [ ] 引入disruptor框架，把事件处理从netty的工作线程中转移到disruptor中处理
+- [x] 对反射调用添加缓存
+- [x] 引入disruptor框架，把事件处理从netty的工作线程中转移到disruptor中处理
 
 
 

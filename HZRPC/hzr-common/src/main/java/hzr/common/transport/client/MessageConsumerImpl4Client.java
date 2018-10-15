@@ -30,7 +30,7 @@ public class MessageConsumerImpl4Client extends MessageConsumer {
 			}
 			log.info("服务端消费 consumerID：" + this.consumerId + "event:" + event.getData());
 		} finally {
-			ReferenceCountUtil.release(response);
+			//ReferenceCountUtil.release(response);
 		}
 	}
 

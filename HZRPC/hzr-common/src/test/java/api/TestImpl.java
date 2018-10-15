@@ -1,8 +1,5 @@
 package api;
 
-/**
- *
- */
 
 public class TestImpl implements ITest {
 
@@ -24,8 +21,4 @@ public class TestImpl implements ITest {
 		return a + b;
 	}
 
-//	@Override
-//	public String toString() {
-//		return super.toString();
-//	}
 }

@@ -10,16 +10,26 @@ import java.util.concurrent.Executors;
 
 public class RingBufferWorkerPoolFactory {
 
+    //客户端服务端双实例
     private static class SingletonHolder {
-        static final RingBufferWorkerPoolFactory instance = new RingBufferWorkerPoolFactory();
+        static final RingBufferWorkerPoolFactory serverInstance = new RingBufferWorkerPoolFactory();
+        static final RingBufferWorkerPoolFactory clientInstance = new RingBufferWorkerPoolFactory();
     }
 
-    private RingBufferWorkerPoolFactory() {
+    public RingBufferWorkerPoolFactory() {
 
     }
 
     public static RingBufferWorkerPoolFactory getInstance() {
-        return SingletonHolder.instance;
+        return SingletonHolder.clientInstance;
+    }
+
+    public static RingBufferWorkerPoolFactory getInstance(String type) {
+        if (type.equals("server")) {
+            return SingletonHolder.serverInstance;
+        } else
+            return SingletonHolder.clientInstance;
+
     }
 
     private static Map<String, MessageProducer> producers = new ConcurrentHashMap<>();
@@ -48,9 +58,9 @@ public class RingBufferWorkerPoolFactory {
         for (MessageConsumer mc : messageConsumers) {
             this.consumers.put(mc.getConsumerId(), mc);
         }
-        //5 添加我们的sequences
+        //5 添加sequences
         this.ringBuffer.addGatingSequences(this.workerPool.getWorkerSequences());
-        //6 启动我们的工作池
+        //6 启动工作池
         this.workerPool.start(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
     }
 
