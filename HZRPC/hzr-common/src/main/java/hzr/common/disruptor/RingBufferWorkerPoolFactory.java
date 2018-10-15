@@ -45,7 +45,7 @@ public class RingBufferWorkerPoolFactory {
     public void initAndStart(ProducerType type, int bufferSize, WaitStrategy waitStrategy, MessageConsumer[] messageConsumers) {
         //1. 构建ringBuffer对象
         this.ringBuffer = RingBuffer.create(type,
-                () -> new TranslatorDataWapper(),
+                TranslatorDataWapper::new,
                 bufferSize,
                 waitStrategy);
         //2.设置序号栅栏
@@ -56,7 +56,7 @@ public class RingBufferWorkerPoolFactory {
                 new EventExceptionHandler(), messageConsumers);
         //4 把所构建的消费者置入池中
         for (MessageConsumer mc : messageConsumers) {
-            this.consumers.put(mc.getConsumerId(), mc);
+            consumers.put(mc.getConsumerId(), mc);
         }
         //5 添加sequences
         this.ringBuffer.addGatingSequences(this.workerPool.getWorkerSequences());
@@ -65,10 +65,10 @@ public class RingBufferWorkerPoolFactory {
     }
 
     public MessageProducer getMessageProducer(String producerId) {
-        MessageProducer messageProducer = this.producers.get(producerId);
+        MessageProducer messageProducer = producers.get(producerId);
         if (null == messageProducer) {
             messageProducer = new MessageProducer(producerId, this.ringBuffer);
-            this.producers.put(producerId, messageProducer);
+            producers.put(producerId, messageProducer);
         }
         return messageProducer;
     }
