@@ -5,7 +5,7 @@ import com.google.common.base.Preconditions;
 import hzr.common.disruptor.MessageConsumer;
 import hzr.common.protocol.Request;
 import hzr.common.protocol.Response;
-import hzr.common.protocol.TranslatorDataWapper;
+import hzr.common.protocol.TranslatorDataWrapper;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,7 +22,9 @@ public class MessageConsumerImpl4Server extends MessageConsumer {
 		super(consumerId);
 	}
 
-	public void onEvent(TranslatorDataWapper event) throws Exception {
+	public void onEvent(TranslatorDataWrapper event) throws Exception {
+		log.info("服务端消费 consumerID：" + this.consumerId + "  event:" + event.getData());
+
 		Request request = (Request) event.getData();
 		ChannelHandlerContext ctx = event.getCtx();
         Map<String, Object> serviceMap = event.getServiceMap();

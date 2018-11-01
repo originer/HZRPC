@@ -2,7 +2,7 @@ package hzr.common.disruptor;
 
 import com.lmax.disruptor.*;
 import com.lmax.disruptor.dsl.ProducerType;
-import hzr.common.protocol.TranslatorDataWapper;
+import hzr.common.protocol.TranslatorDataWrapper;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,16 +36,16 @@ public class RingBufferWorkerPoolFactory {
 
     private static Map<String, MessageConsumer> consumers = new ConcurrentHashMap<>();
 
-    private RingBuffer<TranslatorDataWapper> ringBuffer;
+    private RingBuffer<TranslatorDataWrapper> ringBuffer;
 
     private SequenceBarrier sequenceBarrier;
 
-    private WorkerPool<TranslatorDataWapper> workerPool;
+    private WorkerPool<TranslatorDataWrapper> workerPool;
 
     public void initAndStart(ProducerType type, int bufferSize, WaitStrategy waitStrategy, MessageConsumer[] messageConsumers) {
         //1. 构建ringBuffer对象
         this.ringBuffer = RingBuffer.create(type,
-                TranslatorDataWapper::new,
+                TranslatorDataWrapper::new,
                 bufferSize,
                 waitStrategy);
         //2.设置序号栅栏
@@ -79,8 +79,8 @@ public class RingBufferWorkerPoolFactory {
      *
      * @author Alienware
      */
-    static class EventExceptionHandler implements ExceptionHandler<TranslatorDataWapper> {
-        public void handleEventException(Throwable ex, long sequence, TranslatorDataWapper event) {
+    static class EventExceptionHandler implements ExceptionHandler<TranslatorDataWrapper> {
+        public void handleEventException(Throwable ex, long sequence, TranslatorDataWrapper event) {
         }
 
         public void handleOnStartException(Throwable ex) {

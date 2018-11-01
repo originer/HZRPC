@@ -1,6 +1,6 @@
 package hzr.common.transport.server;
 
-import com.lmax.disruptor.BlockingWaitStrategy;
+import com.lmax.disruptor.YieldingWaitStrategy;
 import com.lmax.disruptor.dsl.ProducerType;
 import hzr.common.codec.V2.RPCDecoder;
 import hzr.common.codec.V2.RPCEncoder;
@@ -79,7 +79,7 @@ public class ServerImpl implements Server {
     @Override
     public void start() {
 
-        MessageConsumer[] consumers = new MessageConsumer[4];
+        MessageConsumer[] consumers = new MessageConsumer[64];
         for (int i = 0; i < consumers.length; i++) {
             MessageConsumer messageConsumer = new MessageConsumerImpl4Server("code:serverId:" + i);
             consumers[i] = messageConsumer;
@@ -87,8 +87,8 @@ public class ServerImpl implements Server {
 
         RingBufferWorkerPoolFactory.getInstance("server").initAndStart(ProducerType.MULTI,
                 1024 * 1024,
-                //new YieldingWaitStrategy(),
-                new BlockingWaitStrategy(),
+                new YieldingWaitStrategy(),
+                //new BlockingWaitStrategy(),
                 consumers);
 
         ServerBootstrap serverBootstrap = new ServerBootstrap();

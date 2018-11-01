@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.Map;
 
 @Data
-public class TranslatorDataWapper {
+public class TranslatorDataWrapper {
 
 	private TranslatorData data;
 	

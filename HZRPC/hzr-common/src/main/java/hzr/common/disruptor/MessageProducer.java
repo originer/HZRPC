@@ -3,7 +3,7 @@ package hzr.common.disruptor;
 
 import com.lmax.disruptor.RingBuffer;
 import hzr.common.protocol.TranslatorData;
-import hzr.common.protocol.TranslatorDataWapper;
+import hzr.common.protocol.TranslatorDataWrapper;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.util.Map;
@@ -12,9 +12,9 @@ public class MessageProducer {
 
 	private String producerId;
 	
-	private RingBuffer<TranslatorDataWapper> ringBuffer;
+	private RingBuffer<TranslatorDataWrapper> ringBuffer;
 	
-	public MessageProducer(String producerId, RingBuffer<TranslatorDataWapper> ringBuffer) {
+	public MessageProducer(String producerId, RingBuffer<TranslatorDataWrapper> ringBuffer) {
 		this.producerId = producerId;
 		this.ringBuffer = ringBuffer;
 	}
@@ -22,7 +22,7 @@ public class MessageProducer {
 	public void onData(TranslatorData data, ChannelHandlerContext ctx) {
 		long sequence = ringBuffer.next();
 		try {
-			TranslatorDataWapper wapper = ringBuffer.get(sequence);
+			TranslatorDataWrapper wapper = ringBuffer.get(sequence);
 			wapper.setData(data);
 			wapper.setCtx(ctx);
 		} finally {
@@ -33,7 +33,7 @@ public class MessageProducer {
 	public void onData(TranslatorData data, ChannelHandlerContext ctx,	Map<String, Object> serviceMap) {
 		long sequence = ringBuffer.next();
 		try {
-			TranslatorDataWapper wapper = ringBuffer.get(sequence);
+			TranslatorDataWrapper wapper = ringBuffer.get(sequence);
 			wapper.setData(data);
 			wapper.setCtx(ctx);
 			wapper.setServiceMap(serviceMap);

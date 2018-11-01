@@ -1,6 +1,7 @@
 package hzr.common.transport.client;
 
 import com.lmax.disruptor.BlockingWaitStrategy;
+import com.lmax.disruptor.YieldingWaitStrategy;
 import com.lmax.disruptor.dsl.ProducerType;
 import hzr.common.disruptor.MessageConsumer;
 import hzr.common.disruptor.RingBufferWorkerPoolFactory;
@@ -45,7 +46,7 @@ public class ClientImpl implements Client {
     // 通过此发布的服务名称,来寻找对应的服务提供者
     private String serviceName;
     // 响应超时时间
-    private int requestTimeoutMillis = 10000;
+    private int requestTimeoutMillis = 100;
     private EventLoopGroup eventLoopGroup = new NioEventLoopGroup(2);
     private String zkConn;
     //select channel 的策略，默认采用顺序选取
@@ -81,15 +82,15 @@ public class ClientImpl implements Client {
             addNewChannel(serviceName, serviceAddress);
         }
 
-        MessageConsumer[] conusmers = new MessageConsumer[8];
+        MessageConsumer[] conusmers = new MessageConsumer[64];
         for (int i = 0; i < conusmers.length; i++) {
             MessageConsumer messageConsumer = new MessageConsumerImpl4Client("code:clientId:" + i);
             conusmers[i] = messageConsumer;
         }
         RingBufferWorkerPoolFactory.getInstance().initAndStart(ProducerType.MULTI,
                 1024 * 1024,
-                //new YieldingWaitStrategy(),
-                new BlockingWaitStrategy(),
+                new YieldingWaitStrategy(),
+                //new BlockingWaitStrategy(),
                 conusmers);
     }
 

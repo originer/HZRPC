@@ -2,9 +2,9 @@ package hzr.common.disruptor;
 
 
 import com.lmax.disruptor.WorkHandler;
-import hzr.common.protocol.TranslatorDataWapper;
+import hzr.common.protocol.TranslatorDataWrapper;
 
-public abstract class MessageConsumer implements WorkHandler<TranslatorDataWapper> {
+public abstract class MessageConsumer implements WorkHandler<TranslatorDataWrapper> {
 
 	protected String consumerId;
 	

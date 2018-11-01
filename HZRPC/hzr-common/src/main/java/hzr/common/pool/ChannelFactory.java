@@ -44,12 +44,11 @@ public class ChannelFactory extends BasePooledObjectFactory<Channel> {
         bootstrap.channel(NioSocketChannel.class)
                 .group(new NioEventLoopGroup(1))
                 .handler(new ChannelInitializer<Channel>() {
-                    protected void initChannel(Channel ch) throws Exception {
+                    protected void initChannel(Channel ch) {
                         ch.pipeline().addLast(new LoggingHandler(LogLevel.INFO))
                                 .addLast(new RPCEncoder(Request.class))
                                 .addLast(new RPCDecoder(Response.class))
-                                .addLast(new RpcClientHandler())
-                        ;
+                                .addLast(new RpcClientHandler());
                     }
                 });
         try {

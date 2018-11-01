@@ -1,8 +1,10 @@
 package hzr.common.transport;
 
+import com.google.common.base.Preconditions;
 import hzr.common.disruptor.MessageProducer;
 import hzr.common.disruptor.RingBufferWorkerPoolFactory;
 import hzr.common.protocol.Request;
+import hzr.common.protocol.Response;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -15,13 +17,15 @@ import java.util.Map;
 public class RpcServerHandler extends SimpleChannelInboundHandler<Request> {
     private final Map<String, Object> serviceMap;
     private static Map<String, Method> methodCache = new HashMap<>();
+    String producerId = "code:sessionId:001";
+    MessageProducer messageProducer = RingBufferWorkerPoolFactory.getInstance("server").getMessageProducer(producerId);
 
     public RpcServerHandler(Map<String, Object> serviceMap) {
         this.serviceMap = serviceMap;
     }
 
     protected void channelRead0(ChannelHandlerContext ctx, Request request) throws Exception {
-        //通过serviceName从serviceMap中取出实例
+        ////通过serviceName从serviceMap中取出实例
         //log.info("请求服务 requestId：{}，serviceName：{}", request.getRequestId(), request.getServiceName());
         //Object service = serviceMap.get(request.getServiceName());
         //Preconditions.checkNotNull(service);
@@ -48,9 +52,7 @@ public class RpcServerHandler extends SimpleChannelInboundHandler<Request> {
         //response.setResponse(invokeResult);
         //ctx.pipeline().writeAndFlush(response);
 
-        //TODO 后续添加多生产者
-        String producerId = "code:sessionId:001";
-        MessageProducer messageProducer = RingBufferWorkerPoolFactory.getInstance("server").getMessageProducer(producerId);
+        //TODO 添加多生产者
         messageProducer.onData(request, ctx, serviceMap);
     }
 
