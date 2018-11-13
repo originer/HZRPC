@@ -11,9 +11,9 @@ import java.util.concurrent.BlockingQueue;
 import static hzr.common.util.ResponseMapCache.responseMap;
 
 @Slf4j
-public class MessageConsumerImpl4Client extends MessageConsumer {
+public class ClientComsumer extends MessageConsumer {
 
-	public MessageConsumerImpl4Client(String consumerId) {
+	public ClientComsumer(String consumerId) {
 		super(consumerId);
 	}
 

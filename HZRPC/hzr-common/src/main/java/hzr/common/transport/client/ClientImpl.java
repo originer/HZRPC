@@ -1,6 +1,5 @@
 package hzr.common.transport.client;
 
-import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.YieldingWaitStrategy;
 import com.lmax.disruptor.dsl.ProducerType;
 import hzr.common.disruptor.MessageConsumer;
@@ -10,7 +9,6 @@ import hzr.common.protocol.Response;
 import hzr.common.proxy.CGLIBProxy;
 import hzr.common.proxy.RPCProxy;
 import hzr.common.transport.ChannelHolder;
-import hzr.common.transport.server.MessageConsumerImpl4Server;
 import hzr.common.util.Constants;
 import hzr.common.util.ResponseMapCache;
 import hzr.register.impl.ZooKeeperServiceDiscovery;
@@ -84,7 +82,7 @@ public class ClientImpl implements Client {
 
         MessageConsumer[] conusmers = new MessageConsumer[64];
         for (int i = 0; i < conusmers.length; i++) {
-            MessageConsumer messageConsumer = new MessageConsumerImpl4Client("code:clientId:" + i);
+            MessageConsumer messageConsumer = new ClientComsumer("code:clientId:" + i);
             conusmers[i] = messageConsumer;
         }
         RingBufferWorkerPoolFactory.getInstance().initAndStart(ProducerType.MULTI,

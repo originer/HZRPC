@@ -14,11 +14,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-public class MessageConsumerImpl4Server extends MessageConsumer {
+public class ServerComsumer extends MessageConsumer {
 
 	private static Map<String, Method> methodCache = new HashMap<>();
 
-	public MessageConsumerImpl4Server(String consumerId) {
+	public ServerComsumer(String consumerId) {
 		super(consumerId);
 	}
 

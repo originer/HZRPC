@@ -81,7 +81,7 @@ public class ServerImpl implements Server {
 
         MessageConsumer[] consumers = new MessageConsumer[64];
         for (int i = 0; i < consumers.length; i++) {
-            MessageConsumer messageConsumer = new MessageConsumerImpl4Server("code:serverId:" + i);
+            MessageConsumer messageConsumer = new ServerComsumer("code:serverId:" + i);
             consumers[i] = messageConsumer;
         }
 
